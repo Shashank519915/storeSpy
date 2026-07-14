@@ -103,23 +103,36 @@ AWS Console → username dropdown → copy **Account ID** (12 digits) for GitHub
 
 ---
 
-### 4. Install local tools (optional with VCS workflow)
+### 4. Install local tools on your PC
 
-VCS workflow runs plan/apply in HCP Terraform — local Terraform is optional for day-to-day ops.
+**Where commands run:** Steps B–F below run in a **local PowerShell terminal** on your Windows machine (Cursor terminal, Windows Terminal, or PowerShell). They do **not** run in HCP Terraform, the AWS web console, or GitHub Actions.
+
+| Tool | Required for | Install |
+|------|----------------|---------|
+| AWS CLI | `aws eks update-kubeconfig`, `aws configure` | `winget install Amazon.AWSCLI` |
+| kubectl | `kubectl get nodes`, Helm (Step C) | Docker Desktop includes it, or `winget install Kubernetes.kubectl` |
+| Helm | Step C platform charts | `winget install Helm.Helm` |
+| Terraform | Optional — local debugging only | `winget install Hashicorp.Terraform` |
+
+After installing, **refresh PATH** (or restart Cursor):
 
 ```powershell
-winget install Hashicorp.Terraform   # optional — for local debugging
-winget install Amazon.AWSCLI         # required for Step B (kubectl/EKS)
-winget install GitHub.cli            # optional
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+aws --version
+kubectl version --client
 ```
 
-After first `terraform apply`, configure AWS CLI for kubectl:
+Configure AWS CLI once (same keys as `terraform-rip-dev`):
 
 ```powershell
 aws configure
-# Same Access Key ID + Secret as terraform-rip-dev
-# Region: us-east-1
+# AWS Access Key ID:     <from terraform-rip-dev IAM user>
+# AWS Secret Access Key: <from terraform-rip-dev IAM user>
+# Default region name:   us-east-1
+# Default output format: json
 ```
+
+> **AWS Console region:** Always switch to **US East (N. Virginia) `us-east-1`** when viewing EKS/VPC resources. The console defaults to your nearest region (e.g. Stockholm) and will show **0 clusters** even when `rip-dev` exists.
 
 ---
 
@@ -155,6 +168,50 @@ After `terraform apply` creates the `rip-dev-ci-deploy` role, GitHub Actions can
 
 **Duration:** EKS cluster + node groups can take **15–30 minutes**.
 
+#### Dev environment decisions (as deployed)
+
+These choices are encoded in `infra/terraform/environments/dev/main.tf` and module defaults. Documented here so you know what was applied and what to change later.
+
+| Decision | Dev choice (now) | Why |
+|----------|------------------|-----|
+| **AWS region** | `us-east-1` | TFC workspace var `AWS_DEFAULT_REGION`; all resources live here |
+| **HCP Terraform** | VCS + auto-apply on `main` | Full repo clone resolves `../../modules`; push triggers apply |
+| **EKS Kubernetes version** | `1.31` | `1.29` unsupported in AWS by Jul 2026 |
+| **EKS node instance types** | `t3.micro` (system + workload) | New AWS accounts only allow free-tier-eligible types until billing is verified |
+| **EKS node counts** | 1 system + 1 workload | Minimal cost; enough to bootstrap Helm/platform charts |
+| **GuardDuty** | Disabled (`enable_guardduty = false`) | New accounts hit `SubscriptionRequiredException` until GuardDuty is subscribed |
+| **CI deploy ECR policy** | Wildcard `arn:aws:ecr:us-east-1:*:repository/rip/*` | No ECR repos exist yet at first apply |
+| **Config / CloudTrail** | S3 bucket policies added in module | Required for delivery channel and trail creation |
+
+#### Upgrading to paid / production-tier sizing (later)
+
+After you add a **payment method** in AWS Billing and want real workload capacity, edit `infra/terraform/environments/dev/main.tf` (or create `rip-staging` / `rip-prod` workspaces):
+
+```hcl
+module "eks" {
+  # ...
+  cluster_version         = "1.31"   # bump when AWS deprecates; check EKS docs
+  system_instance_types   = ["m6i.xlarge"]
+  workload_instance_types = ["m6i.2xlarge"]
+  system_desired_size     = 2
+  workload_desired_size   = 3
+}
+
+module "security_baseline" {
+  # ...
+  enable_guardduty = true   # after subscribing in GuardDuty console once
+}
+```
+
+Push to `main` → VCS triggers plan/apply. Expect node group **replace** (rolling) when instance types change.
+
+| Tier | Suggested instance types | Node counts | Notes |
+|------|------------------------|-------------|-------|
+| **Dev (bootstrap)** | `t3.micro` | 1 + 1 | Current; fine for Helm smoke test |
+| **Dev (paid)** | `t3.medium` or `m6i.large` | 2 + 2 | Comfortable for Vault + Istio + ArgoCD |
+| **Staging** | `m6i.xlarge` | 2 + 3 | Module defaults in `modules/eks` |
+| **Production** | `m6i.2xlarge`+ | Per capacity plan | Separate workspace `rip-prod` |
+
 #### Option 2: Local CLI workflow (Plan A)
 
 ```powershell
@@ -182,17 +239,37 @@ Requires **Local** execution mode (§1d) and `aws configure` on your PC.
 | VCS not triggering runs | Working directory wrong | Must be exactly `infra/terraform/environments/dev` |
 | `not eligible for Free Tier` on EKS node group | New account without billing verification | Dev uses `t3.micro` in `main.tf`; add a payment method in AWS Billing to use `m6i.*` |
 | EKS node group `CREATE_FAILED` after instance fix | Prior failed node groups still exist | EKS console → `rip-dev` → Compute → delete `rip-dev-system` and `rip-dev-workload`, then re-apply |
+| `aws: command not found` | AWS CLI not installed or PATH stale | `winget install Amazon.AWSCLI`, refresh PATH (§4), restart terminal |
+| EKS console shows 0 clusters | Wrong AWS region in browser | Switch console to **US East (N. Virginia) `us-east-1`** |
 
 ---
 
-### Step B — Configure kubectl for EKS
+### Step B — Configure kubectl for EKS (local PowerShell)
+
+Run these on **your PC** in PowerShell (Cursor integrated terminal is fine). Prerequisites: §4 (AWS CLI installed + `aws configure` done).
 
 ```powershell
+# Refresh PATH if you just installed AWS CLI
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# Merge rip-dev kubeconfig into ~/.kube/config
 aws eks update-kubeconfig --region us-east-1 --name rip-dev
+
+# Verify cluster API and nodes
 kubectl get nodes
+kubectl get nodes -o wide
 ```
 
-**Pass criteria:** System + workload node groups Ready within 5 min.
+**Expected output:** 2 nodes in `Ready` state (labels `rip.io/node-pool=system` and `workload`).
+
+**Pass criteria:** All nodes Ready within 5 min of successful Terraform apply.
+
+**Optional sanity check without kubectl:**
+
+```powershell
+aws eks describe-cluster --region us-east-1 --name rip-dev --query "cluster.status"
+# Should print: "ACTIVE"
+```
 
 ### Step C — Deploy platform Helm charts (order matters)
 
@@ -260,20 +337,23 @@ ansible-playbook -i inventory/edge.ini infra/ansible/wireguard-edge.yml
 
 ## Exit criteria checklist
 
-Copy to issue/PR when live deploy is done:
+Progress as of live dev deploy (Jul 2026). Copy to issue/PR when fully done.
 
-- [ ] Monorepo scaffold merged; CI lint jobs green
-- [ ] `rip-dev` Terraform applied
-- [ ] Vault HA unsealed; dynamic PostgreSQL secrets tested
-- [ ] Istio STRICT mTLS enforced
-- [ ] ArgoCD syncing otel-collector
-- [ ] K3s lab + GPU + DCGM (if hardware available)
-- [ ] SPIRE edge SVIDs (if edge node available)
-- [ ] WireGuard 24h soak (if edge node available)
-- [ ] GitHub Actions → ECR via OIDC
-- [ ] Grafana dashboards live
-- [ ] Runbooks approved
-- [ ] Design tokens + ESLint rule in CI ✅ (repo scaffold)
+- [x] Monorepo scaffold merged; CI lint jobs green
+- [x] `rip-dev` Terraform applied (VPC, EKS, S3, IAM OIDC, Config, CloudTrail)
+- [x] EKS reachable — `kubectl get nodes` shows 2× Ready (`t3.micro`, K8s 1.31)
+- [ ] Vault HA unsealed; dynamic PostgreSQL secrets tested — **Step C + D**
+- [ ] Istio STRICT mTLS enforced — **Step C**
+- [ ] ArgoCD syncing otel-collector — **Step C**
+- [ ] K3s lab + GPU + DCGM (if hardware available) — **Step E, optional**
+- [ ] SPIRE edge SVIDs (if edge node available) — **Step E, optional**
+- [ ] WireGuard 24h soak (if edge node available) — **Step E, optional**
+- [ ] GitHub Actions → ECR via OIDC — **Step F**
+- [ ] Grafana dashboards live — **Step C (kube-prometheus-stack)**
+- [x] Runbooks: `phase-0-live-deployment.md` updated with dev decisions + troubleshooting
+- [x] Design tokens + ESLint rule in CI ✅ (repo scaffold)
+
+**Minimum gate to start Phase 1:** Terraform applied + EKS reachable + CI green on `main`. Platform Helm (Step C) can overlap with early Phase 1 work but Vault + ArgoCD are needed before app deploys.
 
 ---
 

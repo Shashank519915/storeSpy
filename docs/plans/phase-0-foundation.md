@@ -105,7 +105,7 @@ Establish the immutable engineering foundation — monorepo skeleton, cloud VPCs
 | Asset | Technology | Specification |
 |-------|------------|---------------|
 | VPC | Terraform `modules/vpc` | 3 AZ, /16 cloud CIDR, private EKS subnets, DB subnet group |
-| EKS | Terraform `modules/eks` | K8s 1.29, managed NG (m6i.xlarge system, m6i.2xlarge workload) |
+| EKS | Terraform `modules/eks` | K8s 1.31; module defaults `m6i.xlarge` / `m6i.2xlarge`; **dev live** uses `t3.micro` ×2 until billing verified (see `phase-0-live-deployment.md`) |
 | Vault | Helm + KMS auto-unseal | 3-node Raft, audit log → S3 |
 | Istio | Helm | STRICT mTLS, ingress gateway for portal only |
 | ArgoCD | Helm | SSO via OIDC, repo-creds via Vault |
@@ -161,8 +161,8 @@ Establish the immutable engineering foundation — monorepo skeleton, cloud VPCs
 
 ## Exit Criteria (Phase 0)
 
-- [ ] Monorepo scaffold merged; all CI lint jobs green on empty services
-- [ ] `rip-dev` Terraform applied: VPC + EKS + S3 + IAM OIDC operational
+- [x] Monorepo scaffold merged; all CI lint jobs green on empty services
+- [x] `rip-dev` Terraform applied: VPC + EKS + S3 + IAM OIDC operational
 - [ ] Vault HA cluster unsealed; dynamic PostgreSQL secrets tested
 - [ ] Istio STRICT mTLS enforced cluster-wide
 - [ ] ArgoCD syncing `infra/helm/charts/otel-collector` to dev EKS
