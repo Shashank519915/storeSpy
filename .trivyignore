@@ -1,0 +1,2 @@
+# Dev VPC uses public subnets for NAT/ALB — intentional for rip-dev
+AVD-AWS-0164

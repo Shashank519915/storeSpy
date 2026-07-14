@@ -371,17 +371,19 @@ gh run list --workflow build-push.yml --repo Shashank519915/storeSpy --limit 3
 Progress as of live dev deploy (Jul 2026). Copy to issue/PR when fully done.
 
 - [x] Monorepo scaffold merged; CI lint jobs green
-- [x] `rip-dev` Terraform applied (VPC, EKS, S3, IAM OIDC, Config, CloudTrail)
-- [x] EKS reachable — `kubectl get nodes` shows 2× Ready (`t3.micro`, K8s 1.31)
-- [ ] Vault HA unsealed; dynamic PostgreSQL secrets tested — **Step C + D**
-- [ ] Istio STRICT mTLS enforced — **Step C**
-- [ ] ArgoCD syncing otel-collector — **Step C**
+- [x] `rip-dev` Terraform applied (VPC, EKS, S3, IAM OIDC, ECR, Vault KMS/IRSA, EBS CSI)
+- [x] EKS reachable — nodes upgraded to `t3.small` for platform pod capacity
+- [x] Vault initialized + KMS auto-unseal; KV paths `secret/rip/{dev,staging,prod}` created
+- [x] Istio STRICT mTLS enforced (`PeerAuthentication` in `istio-system` + `rip-system`)
+- [x] ArgoCD running; `rip-infra` + `rip-apps` ApplicationSets syncing
+- [x] OTel collector deployed (dev deployment mode)
+- [ ] External Secrets `ClusterSecretStore` — apply after ESO pods ready (`external-secrets.io/v1`)
 - [ ] K3s lab + GPU + DCGM (if hardware available) — **Step E, optional**
 - [ ] SPIRE edge SVIDs (if edge node available) — **Step E, optional**
 - [ ] WireGuard 24h soak (if edge node available) — **Step E, optional**
-- [ ] GitHub Actions → ECR via OIDC — **Step F**
-- [ ] Grafana dashboards live — **Step C (kube-prometheus-stack)**
-- [x] Runbooks: `phase-0-live-deployment.md` updated with dev decisions + troubleshooting
+- [x] GitHub Actions OIDC → ECR auth works; **Build & Push** image build still fails (Dockerfile `pip` issue — Phase 1 fix)
+- [ ] Grafana dashboards live — use slim Grafana install or re-enable `kube-prometheus-stack` after node upgrade to `t3.medium`
+- [x] Runbooks + deploy scripts updated (`scripts/phase0-deploy-platform.ps1`)
 - [x] Design tokens + ESLint rule in CI ✅ (repo scaffold)
 
 **Minimum gate to start Phase 1:** Terraform applied + EKS reachable + CI green on `main`. Platform Helm (Step C) can overlap with early Phase 1 work but Vault + ArgoCD are needed before app deploys.

@@ -1,12 +1,20 @@
-# Dev bootstrap — single Vault node, KMS auto-unseal, minimal resources (t3.micro)
-# Use with: helm upgrade --install vault hashicorp/vault -n rip-system -f values.yaml -f values-dev.yaml
+# Dev bootstrap — standalone Vault, KMS auto-unseal, TLS disabled
+# Use alone (do not combine with values.yaml — HA TLS config conflicts):
+#   helm upgrade --install vault hashicorp/vault -n rip-system -f values-dev.yaml
 
 global:
+  enabled: true
   tlsDisable: true
 
 server:
+  enabled: true
+  image:
+    repository: hashicorp/vault
   ha:
     enabled: false
+    replicas: 1
+    raft:
+      enabled: false
   standalone:
     enabled: true
     config: |

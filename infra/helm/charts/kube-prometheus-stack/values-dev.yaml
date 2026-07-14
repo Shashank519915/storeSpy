@@ -4,6 +4,15 @@
 alertmanager:
   enabled: false
 
+kube-state-metrics:
+  enabled: false
+
+prometheus:
+  enabled: false
+
+prometheus-node-exporter:
+  enabled: false
+
 grafana:
   enabled: true
   adminPassword: rip-dev-change-me

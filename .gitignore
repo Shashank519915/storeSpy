@@ -61,7 +61,10 @@ ml/golden-datasets/**/*.mp4
 ml/golden-datasets/**/*.parquet
 ml/triton-model-repo/**/*.engine
 
-# Logs & coverage
+# Secrets — never commit
+vault-init.json
+.env
+.env.*
 *.log
 coverage/
 .nyc_output/
