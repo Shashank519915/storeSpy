@@ -6,7 +6,7 @@ metadata:
 spec:
   generators:
     - git:
-        repoURL: https://github.com/rip-platform/rip.git
+        repoURL: https://github.com/Shashank519915/storeSpy.git
         revision: main
         directories:
           - path: apps/*
@@ -18,7 +18,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/rip-platform/rip.git
+        repoURL: https://github.com/Shashank519915/storeSpy.git
         targetRevision: main
         path: "{{path}}"
       destination:
@@ -58,7 +58,7 @@ spec:
     spec:
       project: infra
       source:
-        repoURL: https://github.com/rip-platform/rip.git
+        repoURL: https://github.com/Shashank519915/storeSpy.git
         targetRevision: main
         path: "{{path}}"
       destination:

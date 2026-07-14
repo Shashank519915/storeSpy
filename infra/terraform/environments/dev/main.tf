@@ -41,12 +41,12 @@ variable "environment" {
 
 variable "github_org" {
   type    = string
-  default = "rip-platform"
+  default = "Shashank519915"
 }
 
 variable "github_repo" {
   type    = string
-  default = "rip"
+  default = "storeSpy"
 }
 
 locals {
