@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package rip.vision.v1;
+
+import "google/protobuf/timestamp.proto";
+import "rip/common/v1/envelope.proto";
+import "rip/common/v1/geometry.proto";
+
+option go_package = "github.com/rip/rip/packages/proto/gen/go/rip/vision/v1;visionv1";
+
+// TrackletUpdated is high-volume telemetry keyed by camera_id.
+message TrackletUpdated {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string camera_id = 2;
+  string track_id = 3;
+  rip.common.v1.BoundingBox bbox = 4;
+  rip.common.v1.WorldPoint world_position = 5;
+  float confidence = 6;
+  google.protobuf.Timestamp frame_timestamp = 7;
+}

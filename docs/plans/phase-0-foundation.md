@@ -163,7 +163,7 @@ Establish the immutable engineering foundation — monorepo skeleton, cloud VPCs
 
 - [x] Monorepo scaffold merged; all CI lint jobs green on empty services
 - [x] `rip-dev` Terraform applied: VPC + EKS + S3 + IAM OIDC operational
-- [ ] Vault HA cluster unsealed; dynamic PostgreSQL secrets tested
+- [ ] Vault HA cluster unsealed; dynamic PostgreSQL secrets tested — **deferred to Phase 1 §1.5 (RIP-1-047) after RDS live**
 - [ ] Istio STRICT mTLS enforced cluster-wide
 - [ ] ArgoCD syncing `infra/helm/charts/otel-collector` to dev EKS
 - [ ] K3s lab node provisioned via Ansible; GPU Operator + DCGM healthy

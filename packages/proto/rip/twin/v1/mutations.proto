@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package rip.twin.v1;
+
+import "google/protobuf/timestamp.proto";
+import "rip/common/v1/envelope.proto";
+
+option go_package = "github.com/rip/rip/packages/proto/gen/go/rip/twin/v1;twinv1";
+
+// LayoutChanged — store layout snapshot version incremented.
+message LayoutChanged {
+  rip.common.v1.EventEnvelope envelope = 1;
+  int32 twin_version = 2;
+  string layout_snapshot_id = 3;
+  google.protobuf.Timestamp valid_from = 4;
+}
+
+// CameraPitchChanged — camera mount orientation updated.
+message CameraPitchChanged {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string camera_id = 2;
+  double pan_degrees = 3;
+  double tilt_degrees = 4;
+  double fov_degrees = 5;
+  int32 twin_version = 6;
+}
+
+// ShelfMoved — shelf spatial object repositioned in the twin.
+message ShelfMoved {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string shelf_id = 2;
+  int32 twin_version = 3;
+  double world_x = 4;
+  double world_y = 5;
+}

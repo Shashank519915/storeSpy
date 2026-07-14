@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package rip.vision.v1;
+
+import "rip/common/v1/envelope.proto";
+import "rip/common/v1/geometry.proto";
+
+option go_package = "github.com/rip/rip/packages/proto/gen/go/rip/vision/v1;visionv1";
+
+// ProductPickedUp — hand-object interaction: item removed from shelf.
+message ProductPickedUp {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string camera_id = 2;
+  string track_id = 3;
+  string product_sku = 4;
+  string shelf_id = 5;
+  rip.common.v1.WorldPoint world_position = 6;
+  float confidence = 7;
+}
+
+// ProductReturned — item returned to shelf after pickup.
+message ProductReturned {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string camera_id = 2;
+  string track_id = 3;
+  string product_sku = 4;
+  string shelf_id = 5;
+  rip.common.v1.WorldPoint world_position = 6;
+  float confidence = 7;
+}
+
+// ConcealmentDetected — product disappeared into bag/pocket without scan.
+message ConcealmentDetected {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string camera_id = 2;
+  string track_id = 3;
+  string product_sku = 4;
+  rip.common.v1.WorldPoint world_position = 5;
+  float confidence = 6;
+}

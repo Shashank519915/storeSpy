@@ -378,11 +378,11 @@ Progress as of live dev deploy (Jul 2026). Copy to issue/PR when fully done.
 - [x] ArgoCD running; `rip-infra` + `rip-apps` ApplicationSets syncing
 - [x] OTel collector deployed (dev deployment mode)
 - [x] External Secrets `ClusterSecretStore` `rip-vault` — Valid/Ready (dev uses `http://` Vault)
-- [ ] K3s lab + GPU + DCGM (if hardware available) — **Step E, optional**
-- [ ] SPIRE edge SVIDs (if edge node available) — **Step E, optional**
-- [ ] WireGuard 24h soak (if edge node available) — **Step E, optional**
+- [ ] K3s lab + GPU + DCGM (if hardware available) — **Step E, deferred to Phase 2** (see `phase-2-edge-cv.md`)
+- [ ] SPIRE edge SVIDs (if edge node available) — **Step E, deferred to Phase 2**
+- [ ] WireGuard 24h soak (if edge node available) — **Step E, deferred to Phase 2**
 - [x] GitHub Actions OIDC → ECR auth works; **Build & Push** image build still fails (Dockerfile `pip` issue — Phase 1 fix)
-- [ ] Grafana dashboards live — use slim Grafana install or re-enable `kube-prometheus-stack` after node upgrade to `t3.medium`
+- [ ] Grafana dashboards live — **deferred** until post-phase node upgrade (`t3.medium+`); see Phase 1 deferred table
 - [x] Runbooks + deploy scripts updated (`scripts/phase0-deploy-platform.ps1`)
 - [x] Design tokens + ESLint rule in CI ✅ (repo scaffold)
 

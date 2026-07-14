@@ -1,7 +1,15 @@
 # RIP Phase 1: The Event Backbone & Data Layer
-**Prerequisites:** Phase 0 exit criteria met
+**Prerequisites:** Phase 0 exit criteria met (see deferred items below)
 **Governance:** code_style.md, design-tokens.md
 **Master plan:** rip-execution-plan.md (this is the standalone working copy)
+
+## Deferred from Phase 0 (do not block Phase 1)
+
+| Item | Deferred to | Notes |
+|------|-------------|-------|
+| Grafana / kube-prometheus-stack | Post–Phase 6 hardening | `rip-dev` uses `t3.small`; monitoring dashboards re-enabled after node upgrade |
+| Vault PostgreSQL dynamic secrets (RIP-0-023) | **This phase — §1.5** (RIP-1-047) | Configure after RDS PostgreSQL is live; path `database/creds/rip-postgresql` |
+| Phase 0 Step E edge lab (K3s, SPIRE, WireGuard) | **Phase 2** (see `phase-2-edge-cv.md`) | Cloud backbone first; edge lab required before edge CV exit criteria |
 
 
 ## Phase Objective
@@ -23,6 +31,20 @@ Deploy the immutable event nervous system (Kafka MSK + Schema Registry + Debeziu
 ---
 
 ## Granular Tasks
+
+### Progress (Phase 1 kickoff)
+
+- [x] RIP-1-001 — `EventEnvelope` + `google.protobuf.Any` payload
+- [x] RIP-1-002 — `TrackletUpdated`
+- [x] RIP-1-003 — `ProductPickedUp`, `ProductReturned`, `ConcealmentDetected`
+- [x] RIP-1-004 — `TransactionEvent`
+- [x] RIP-1-005 — `LayoutChanged`, `CameraPitchChanged`, `ShelfMoved`
+- [x] RIP-1-006 — `HypothesisUpdated`, `InvestigationTaskCreated`
+- [x] RIP-1-007 — `schema-registry.yml` CI (buf lint/breaking/generate; push when `BUF_TOKEN` set)
+- [x] RIP-1-008 — `buf.gen.yaml` (Go, Python, TypeScript)
+- [x] RIP-1-030 — `infra/migrations/001_outbox.sql`
+- [x] RIP-1-014 — `docs/runbooks/kafka-serde.md`
+- [ ] RIP-1-010+ — MSK Terraform, Schema Registry Helm, remaining persistence tier
 
 ### 1.1 Protobuf Schema Foundation
 | Ticket ID | Task | Output Path |
@@ -76,7 +98,7 @@ Deploy the immutable event nervous system (Kafka MSK + Schema Registry + Debeziu
 | RIP-1-044 | Tables: `twin.store_layouts` (JSONB snapshot), `twin.spatial_objects` (PostGIS geometry) | `infra/migrations/005_twin.sql` |
 | RIP-1-045 | GiST index on `twin.spatial_objects.geom`; GIN on `twin.store_layouts.snapshot` | `infra/migrations/006_indexes.sql` |
 | RIP-1-046 | Deploy PgBouncer on EKS: transaction pooling, max 200 connections | `infra/helm/charts/pgbouncer/` |
-| RIP-1-047 | Vault dynamic creds for `twin-api` SA → `twin` schema only | Vault policy HCL |
+| RIP-1-047 | Vault dynamic creds for `twin-api` SA → `twin` schema only | Vault policy HCL — **after RDS live** (deferred from Phase 0 RIP-0-023) |
 
 ### 1.6 ClickHouse OLAP Event Store
 | Ticket ID | Task | Output Path |

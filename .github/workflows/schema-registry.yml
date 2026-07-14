@@ -1,0 +1,51 @@
+# Schema Registry & Protobuf CI
+# Ticket: RIP-1-007
+
+name: Schema Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/proto/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/proto/**"
+
+permissions:
+  contents: read
+
+jobs:
+  buf:
+    name: buf lint + breaking + generate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: bufbuild/buf-setup-action@v1
+
+      - name: buf lint
+        run: buf lint packages/proto
+
+      - name: buf breaking (against main)
+        run: buf breaking packages/proto --against '.git#branch=main,subdir=packages/proto'
+
+      - name: buf generate
+        run: buf generate packages/proto
+
+      - name: Verify TypeScript codegen output
+        run: test -d packages/proto/gen/ts
+
+      - name: buf push (BSR)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          BUF_TOKEN: ${{ secrets.BUF_TOKEN }}
+        run: |
+          if [ -z "$BUF_TOKEN" ]; then
+            echo "BUF_TOKEN not set — skipping buf push (add secret to enable Schema Registry sync)"
+            exit 0
+          fi
+          buf push packages/proto

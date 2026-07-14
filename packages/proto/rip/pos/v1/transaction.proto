@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package rip.pos.v1;
+
+import "google/protobuf/timestamp.proto";
+import "rip/common/v1/envelope.proto";
+
+option go_package = "github.com/rip/rip/packages/proto/gen/go/rip/pos/v1;posv1";
+
+enum TransactionEventType {
+  TRANSACTION_EVENT_TYPE_UNSPECIFIED = 0;
+  TRANSACTION_EVENT_TYPE_ITEM_SCANNED = 1;
+  TRANSACTION_EVENT_TYPE_VOIDED = 2;
+  TRANSACTION_EVENT_TYPE_PAYMENT_COMPLETED = 3;
+}
+
+// TransactionEvent — normalized POS event from edge adapters.
+message TransactionEvent {
+  rip.common.v1.EventEnvelope envelope = 1;
+  TransactionEventType event_type = 2;
+  string terminal_id = 3;
+  string transaction_id = 4;
+  string product_sku = 5;
+  int32 quantity = 6;
+  int64 amount_cents = 7;
+  string currency_code = 8;
+  google.protobuf.Timestamp pos_timestamp = 9;
+}

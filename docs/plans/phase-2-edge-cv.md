@@ -3,6 +3,17 @@
 **Governance:** code_style.md, design-tokens.md
 **Master plan:** rip-execution-plan.md (this is the standalone working copy)
 
+## Deferred from Phase 0 (Step E — edge lab)
+
+Phase 0 runbook Step E (K3s lab, GPU Operator, SPIRE edge SVIDs, WireGuard soak) is **optional for Phase 0 exit** and is a **hard prerequisite for Phase 2 exit**. Complete before starting Phase 2 edge CV work:
+
+| Phase 0 ticket | Phase 2 dependency | Runbook |
+|----------------|-------------------|---------|
+| RIP-0-040–046 Ansible + K3s + GPU + SPIRE + WireGuard | Strimzi edge Kafka (RIP-1-020), Triton on K3s (RIP-2-020), ingestor NVDEC tests | `docs/runbooks/phase-0-live-deployment.md` §Step E |
+| RIP-0-044 SPIRE edge SVIDs | MinIO mTLS edge auth (RIP-1-093), Fleet GitOps | `infra/ansible/`, `infra/helm/charts/spire/` |
+
+Cloud-only Phase 1 work (MSK, RDS, ClickHouse) can proceed in parallel while edge hardware is provisioned.
+
 
 ## Phase Objective
 Build the production edge perception stack: Rust/Go FFmpeg NVDEC ingestor with CUDA pinned-memory ring buffer, Triton Inference Server with TensorRT engines, BoT-SORT + CMC tracking, 3D homography ground-plane projection, dynamic frame-sampling state machine, and semantic event emission to edge Redis Streams/Kafka. At exit, a live RTSP feed (or synthetic Virtual Camera) produces `ProductPickedUp` events with world coordinates enriched via Digital Twin shelf mapping stubs.

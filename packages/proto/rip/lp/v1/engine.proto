@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package rip.lp.v1;
+
+import "rip/common/v1/envelope.proto";
+
+option go_package = "github.com/rip/rip/packages/proto/gen/go/rip/lp/v1;lpv1";
+
+// HypothesisUpdated — LP engine suspicion score changed for a session.
+message HypothesisUpdated {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string hypothesis_id = 2;
+  double suspicion_score = 3;
+  string reason_code = 4;
+}
+
+// InvestigationTaskCreated — human review task opened by LP engine.
+message InvestigationTaskCreated {
+  rip.common.v1.EventEnvelope envelope = 1;
+  string task_id = 2;
+  string hypothesis_id = 3;
+  string priority = 4;
+  string assigned_queue = 5;
+}

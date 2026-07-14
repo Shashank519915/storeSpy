@@ -2,18 +2,25 @@ syntax = "proto3";
 
 package rip.common.v1;
 
+import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/rip/rip/packages/proto/gen/go/rip/common/v1;commonv1";
 
 // EventEnvelope is the canonical wrapper for all Kafka events.
 message EventEnvelope {
+  // UUIDv7, time-ordered, globally unique.
   string event_id = 1;
+  // W3C trace ID (32 hex chars).
   string trace_id = 2;
+  // W3C span ID (16 hex chars).
   string span_id = 3;
   google.protobuf.Timestamp occurred_at = 4;
   google.protobuf.Timestamp ingested_at = 5;
   string store_id = 6;
+  // Partition key for business-logic topics.
   string session_id = 7;
   string schema_version = 8;
+  // Domain-specific payload (ProductPickedUp, LayoutChanged, etc.).
+  google.protobuf.Any payload = 9;
 }
