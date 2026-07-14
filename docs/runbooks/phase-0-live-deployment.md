@@ -180,6 +180,8 @@ Requires **Local** execution mode (§1d) and `aws configure` on your PC.
 | `terraform: command not found` (fallback) | WinGet shim not in PATH | `& "$env:LOCALAPPDATA\Microsoft\WinGet\Links\terraform.exe" version` |
 | Plan fails with AWS auth error | Missing/wrong workspace variables | Re-check §1b; keys must be **Environment variables**, Sensitive checked |
 | VCS not triggering runs | Working directory wrong | Must be exactly `infra/terraform/environments/dev` |
+| `not eligible for Free Tier` on EKS node group | New account without billing verification | Dev uses `t3.micro` in `main.tf`; add a payment method in AWS Billing to use `m6i.*` |
+| EKS node group `CREATE_FAILED` after instance fix | Prior failed node groups still exist | EKS console → `rip-dev` → Compute → delete `rip-dev-system` and `rip-dev-workload`, then re-apply |
 
 ---
 

@@ -92,6 +92,13 @@ module "eks" {
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
   tags               = local.common_tags
+
+  # New AWS accounts without billing verification only allow free-tier instance types.
+  # Upgrade to t3.medium+ after adding a payment method (see runbook troubleshooting).
+  system_instance_types   = ["t3.micro"]
+  workload_instance_types = ["t3.micro"]
+  system_desired_size     = 1
+  workload_desired_size   = 1
 }
 
 module "security_baseline" {
