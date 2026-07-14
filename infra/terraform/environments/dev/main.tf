@@ -55,8 +55,8 @@ variable "github_repo" {
 
 variable "enable_msk" {
   type        = bool
-  default     = true
-  description = "Provision Amazon MSK (3× kafka.t3.small). Disable to skip Kafka cost during early scaffold work."
+  default     = false
+  description = "Provision Amazon MSK (3× kafka.t3.small). Requires AWS billing/payment method — new accounts hit SubscriptionRequiredException until subscribed. Set true after adding payment method in AWS Billing."
 }
 
 locals {

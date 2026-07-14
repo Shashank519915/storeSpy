@@ -10,6 +10,7 @@
 | Grafana / kube-prometheus-stack | Post–Phase 6 hardening | `rip-dev` uses `t3.small`; monitoring dashboards re-enabled after node upgrade |
 | Vault PostgreSQL dynamic secrets (RIP-0-023) | **This phase — §1.5** (RIP-1-047) | Configure after RDS PostgreSQL is live; path `database/creds/rip-postgresql` |
 | Phase 0 Step E edge lab (K3s, SPIRE, WireGuard) | **Phase 2** (see `phase-2-edge-cv.md`) | Cloud backbone first; edge lab required before edge CV exit criteria |
+| **Amazon MSK** | **After AWS billing subscription** | New accounts: `SubscriptionRequiredException` on `CreateConfiguration`. Set `enable_msk = true` in `dev/main.tf` after adding a payment method. Until then, continue §1.4/§1.5 (RDS, outbox) and Schema Registry can target in-cluster Kafka later. |
 
 
 ## Phase Objective
@@ -45,7 +46,8 @@ Deploy the immutable event nervous system (Kafka MSK + Schema Registry + Debeziu
 - [x] RIP-1-030 — `infra/migrations/001_outbox.sql`
 - [x] RIP-1-014 — `docs/runbooks/kafka-serde.md`
 - [ ] RIP-1-010+ — MSK Terraform, Schema Registry Helm, remaining persistence tier
-- [x] RIP-1-010 — Terraform module `msk` (3× `kafka.t3.small`, TLS, IAM auth)
+- [x] RIP-1-016 — MSK IAM roles (`msk-iam`: admin, producer, consumer) — created; destroyed when `enable_msk=false`
+- [ ] RIP-1-010 live — MSK cluster (`enable_msk=true` after AWS billing subscription)
 - [x] RIP-1-011 — Topic manifest `msk-topics` + EKS bootstrap Job
 - [x] RIP-1-012 — Partition strategy documented (`kafka-topic-catalog.md`)
 - [x] RIP-1-015 — DLQ + retry topics per consumer domain

@@ -48,6 +48,22 @@ HCP Terraform creates the MSK cluster but cannot reach private brokers. Run from
 
 Requires: EKS reachable, `rip-dev-msk-admin` IAM role (Terraform `msk-iam` module), MSK cluster status ACTIVE.
 
+## MSK blocked on new AWS accounts
+
+If Terraform apply fails with:
+
+```
+SubscriptionRequiredException: The AWS Access Key Id needs a subscription for the service
+```
+
+MSK (and GuardDuty) require a **payment method** on the AWS account before the service can be used.
+
+1. AWS Console → **Billing and Cost Management** → add a payment method
+2. In `infra/terraform/environments/dev/main.tf` set `enable_msk = true` (or add TFC workspace variable `enable_msk`)
+3. Re-run apply in HCP Terraform — partial MSK resources from a failed run are cleaned up when `enable_msk=false`
+
+Until MSK is available, Phase 1 can continue with **RDS + outbox + Debezium** (§1.4–1.5); Kafka topic bootstrap waits for MSK ACTIVE.
+
 ## Schema Registry
 
 Internal topic: `_schemas` (created automatically by Schema Registry on first start).

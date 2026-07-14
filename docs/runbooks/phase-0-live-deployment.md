@@ -239,6 +239,7 @@ Requires **Local** execution mode (§1d) and `aws configure` on your PC.
 | Plan fails with AWS auth error | Missing/wrong workspace variables | Re-check §1b; keys must be **Environment variables**, Sensitive checked |
 | VCS not triggering runs | Working directory wrong | Must be exactly `infra/terraform/environments/dev` |
 | `not eligible for Free Tier` on EKS node group | New account without billing verification | Dev bootstrap used `t3.micro`; platform Helm needs `t3.small+` in `main.tf` after adding a payment method |
+| `SubscriptionRequiredException` on MSK / GuardDuty | New account without billing subscription | Set `enable_msk = false` (default) until payment method added; then `enable_msk = true` |
 | EKS node group `CREATE_FAILED` after instance fix | Prior failed node groups still exist | EKS console → `rip-dev` → Compute → delete `rip-dev-system` and `rip-dev-workload`, then re-apply |
 | `aws: command not found` | AWS CLI not installed or PATH stale | `winget install Amazon.AWSCLI`, refresh PATH (§4), restart terminal |
 | EKS console shows 0 clusters | Wrong AWS region in browser | Switch console to **US East (N. Virginia) `us-east-1`** |
