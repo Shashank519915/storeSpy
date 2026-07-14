@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.80"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -115,6 +119,21 @@ module "iam_github_oidc" {
   tags        = local.common_tags
 }
 
+module "ecr_repositories" {
+  source = "../../modules/ecr-repositories"
+  name   = local.name
+  tags   = local.common_tags
+}
+
+module "vault_prerequisites" {
+  source = "../../modules/vault-prerequisites"
+
+  name                      = local.name
+  cluster_oidc_issuer_url   = module.eks.cluster_oidc_issuer_url
+  cluster_oidc_provider_arn = module.eks.oidc_provider_arn
+  tags                      = local.common_tags
+}
+
 output "vpc_id" {
   value = module.vpc.vpc_id
 }
@@ -129,4 +148,16 @@ output "ci_deploy_role_arn" {
 
 output "s3_buckets" {
   value = module.s3_foundation.bucket_names
+}
+
+output "ecr_repository_urls" {
+  value = module.ecr_repositories.repository_urls
+}
+
+output "vault_irsa_role_arn" {
+  value = module.vault_prerequisites.vault_irsa_role_arn
+}
+
+output "vault_kms_key_alias" {
+  value = module.vault_prerequisites.kms_key_alias
 }

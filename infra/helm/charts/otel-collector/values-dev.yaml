@@ -1,0 +1,14 @@
+# Dev bootstrap — lighter collector on small nodes
+# helm upgrade --install otel-collector open-telemetry/opentelemetry-collector -n rip-system -f values.yaml -f values-dev.yaml
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+config:
+  processors:
+    memory_limiter:
+      limit_mib: 128

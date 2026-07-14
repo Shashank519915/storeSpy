@@ -1,0 +1,52 @@
+# Dev bootstrap — reduced Argo CD footprint
+# helm upgrade --install argocd argo/argo-cd -n argocd -f values-dev.yaml
+
+global:
+  revisionHistoryLimit: 2
+
+controller:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+server:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+  extraArgs:
+    - --insecure
+
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+applicationSet:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+redis:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false

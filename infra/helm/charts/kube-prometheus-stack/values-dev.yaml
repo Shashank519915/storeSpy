@@ -1,0 +1,43 @@
+# Dev bootstrap — minimal Prometheus + Grafana for t3.micro nodes
+# Use with: helm upgrade --install monitoring prometheus-community/kube-prometheus-stack -n monitoring -f values.yaml -f values-dev.yaml
+
+alertmanager:
+  enabled: false
+
+grafana:
+  enabled: true
+  adminPassword: rip-dev-change-me
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+prometheus:
+  prometheusSpec:
+    retention: 2d
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    storageSpec: {}
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+
+defaultRules:
+  create: true

@@ -273,6 +273,19 @@ aws eks describe-cluster --region us-east-1 --name rip-dev --query "cluster.stat
 
 ### Step C — Deploy platform Helm charts (order matters)
 
+**Dev bootstrap (t3.micro):** use the scripted installer — it applies `values-dev.yaml` overlays for smaller footprints.
+
+```powershell
+# From repo root — requires Helm (§4) and kubectl (Step B)
+.\scripts\phase0-deploy-platform.ps1
+```
+
+The script installs Vault → Istio → OTel → Argo CD → kube-prometheus-stack → External Secrets → network policies, then runs `vault-bootstrap.ps1` (Step D).
+
+**Prerequisite:** Terraform must include `vault-prerequisites` (KMS `alias/rip-vault-unseal` + Vault IRSA role). Push infra changes to `main` and wait for HCP Terraform apply before running the script.
+
+**Manual equivalent (reference):**
+
 ```powershell
 # Add Helm repos
 helm repo add hashicorp https://helm.releases.hashicorp.com
@@ -280,37 +293,47 @@ helm repo add istio https://istio-release.storage.googleapis.com/charts
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo add external-secrets https://charts.external-secrets.io
 helm repo update
 
 # Create namespace
 kubectl create namespace rip-system
 
-# Sync wave 0 — Vault, network policies
-helm upgrade --install vault hashicorp/vault -n rip-system -f infra/helm/charts/vault/values.yaml
-kubectl apply -f infra/helm/charts/network-policies/rip-system.yaml
-
-# Initialize and unseal Vault (manual — see HashiCorp docs)
-# Configure KMS auto-unseal key: alias/rip-vault-unseal
+# Sync wave 0 — Vault (dev values + IRSA annotation from terraform output vault_irsa_role_arn)
+helm upgrade --install vault hashicorp/vault -n rip-system `
+  -f infra/helm/charts/vault/values.yaml `
+  -f infra/helm/charts/vault/values-dev.yaml `
+  --set server.serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<vault_irsa_role_arn>
 
 # Sync wave 1 — Istio, OTel, cert-manager
 helm upgrade --install istio-base istio/base -n istio-system --create-namespace
 helm upgrade --install istiod istio/istiod -n istio-system
 kubectl apply -f infra/helm/values/istio/peer-authentication.yaml
-helm upgrade --install otel-collector open-telemetry/opentelemetry-collector -n rip-system -f infra/helm/charts/otel-collector/values.yaml
+helm upgrade --install otel-collector open-telemetry/opentelemetry-collector -n rip-system `
+  -f infra/helm/charts/otel-collector/values.yaml `
+  -f infra/helm/charts/otel-collector/values-dev.yaml
 
-# Sync wave 2 — ArgoCD
-helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace
+# Sync wave 2 — ArgoCD + monitoring
+helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace -f infra/helm/charts/argocd/values-dev.yaml
 kubectl apply -f infra/argocd/app-projects.yaml
 kubectl apply -f infra/argocd/applicationsets/rip-platform.yaml
+helm upgrade --install monitoring prometheus-community/kube-prometheus-stack -n monitoring --create-namespace `
+  -f infra/helm/charts/kube-prometheus-stack/values.yaml `
+  -f infra/helm/charts/kube-prometheus-stack/values-dev.yaml
+
+# Network policies last
+kubectl apply -f infra/helm/charts/network-policies/rip-system.yaml
 ```
 
 ### Step D — Vault configuration
 
-1. Enable namespaces: `rip/dev`, `rip/staging`, `rip/prod`
-2. Enable PKI engine → intermediate CA `rip-internal-ca` (24h TTL)
-3. Enable Database secrets engine for PostgreSQL (1h TTL)
+Run automatically via `scripts/vault-bootstrap.ps1` (called from `phase0-deploy-platform.ps1`), or manually:
+
+1. `vault operator init` (KMS auto-unseal — no manual unseal keys needed after KMS is configured)
+2. Enable KV v2 paths: `secret/rip/dev`, `secret/rip/staging`, `secret/rip/prod`
+3. Enable PKI engine at `pki_int` → intermediate CA `rip-internal-ca` (24h TTL for issued certs)
 4. Configure Kubernetes auth per `infra/helm/charts/vault-auth/values.yaml`
-5. Deploy External Secrets Operator + `ClusterSecretStore`
+5. Deploy External Secrets Operator + `ClusterSecretStore` (included in deploy script)
 
 See `docs/runbooks/vault-paths.md`.
 
@@ -329,9 +352,16 @@ ansible-playbook -i inventory/edge.ini infra/ansible/wireguard-edge.yml
 
 ### Step F — Verify CI OIDC
 
-1. Push a commit to `main` (or open PR)
-2. Confirm `CI Foundation` workflow passes
-3. Confirm `Build & Push` can assume `rip-dev-ci-deploy` role (after ECR repos exist)
+1. Confirm `AWS_ACCOUNT_ID` GitHub secret is set (§3)
+2. Push this commit to `main` — `CI Foundation` and `Security Scan` should pass
+3. After ECR repos exist (Terraform `ecr-repositories` module), trigger **Build & Push** manually:
+
+```powershell
+gh workflow run build-push.yml --repo Shashank519915/storeSpy
+gh run list --workflow build-push.yml --repo Shashank519915/storeSpy --limit 3
+```
+
+4. Confirm workflow assumes `rip-dev-ci-deploy` role and pushes to `rip/<service>` ECR repos
 
 ---
 
