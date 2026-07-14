@@ -1,0 +1,58 @@
+---
+# Edge bare-metal bootstrap — OS hardening, NVIDIA drivers, container toolkit
+# Ticket: RIP-0-040
+- name: Edge Bootstrap
+  hosts: edge_nodes
+  become: true
+  vars:
+    nvidia_driver_version: "535"
+    swap_enabled: false
+  tasks:
+    - name: Disable swap
+      ansible.builtin.command: swapoff -a
+      when: not swap_enabled
+
+    - name: Remove swap from fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '\sswap\s'
+        state: absent
+
+    - name: Set ulimits for container workloads
+      ansible.builtin.pam_limits:
+        domain: "*"
+        limit_type: soft
+        limit_item: nofile
+        value: "1048576"
+
+    - name: Install chrony for PTP/time sync
+      ansible.builtin.apt:
+        name: chrony
+        state: present
+        update_cache: true
+
+    - name: Ensure chrony is running
+      ansible.builtin.service:
+        name: chrony
+        state: started
+        enabled: true
+
+    - name: Install NVIDIA driver {{ nvidia_driver_version }}
+      ansible.builtin.apt:
+        name: "nvidia-driver-{{ nvidia_driver_version }}"
+        state: present
+
+    - name: Install NVIDIA container toolkit
+      ansible.builtin.apt:
+        name: nvidia-container-toolkit
+        state: present
+
+    - name: Configure containerd for NVIDIA runtime
+      ansible.builtin.command: nvidia-ctk runtime configure --runtime=containerd
+      notify: Restart containerd
+
+  handlers:
+    - name: Restart containerd
+      ansible.builtin.service:
+        name: containerd
+        state: restarted

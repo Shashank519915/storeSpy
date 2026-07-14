@@ -1,0 +1,18 @@
+# Tempo trace storage
+# Ticket: RIP-0-035
+
+tempo:
+  retention: 168h
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: rip-tempo-traces
+      endpoint: s3.us-east-1.amazonaws.com
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317

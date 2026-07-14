@@ -1,0 +1,13 @@
+/**
+ * RIP Design Tokens — Radius
+ * Source of truth: design-tokens.md §6
+ * Cards max 8px — no 32px card radius (impeccable ban)
+ */
+
+:root {
+  --rip-radius-sm: 0.25rem;
+  --rip-radius-md: 0.375rem;
+  --rip-radius-lg: 0.5rem;
+  --rip-radius-xl: 0.75rem;
+  --rip-radius-full: 9999px;
+}

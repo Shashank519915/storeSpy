@@ -1,0 +1,62 @@
+# Trivy security scan — Critical/High CVE blocks merge
+# Ticket: RIP-0-052
+
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  trivy-fs:
+    name: Trivy filesystem scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner (filesystem)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+  trivy-config:
+    name: Trivy IaC scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy config scanner
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: config
+          scan-ref: infra/
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+  conftest:
+    name: Conftest policy gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Conftest
+        run: |
+          wget -qO /usr/local/bin/conftest https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz
+          tar xzf /usr/local/bin/conftest -C /usr/local/bin conftest 2>/dev/null || \
+          curl -sL https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz | tar xz -C /usr/local/bin conftest
+
+      - name: Test Helm/K8s manifests against policies
+        run: |
+          find infra/helm edge -name '*.yaml' -o -name '*.yml' | while read f; do
+            conftest test "$f" -p infra/helm/policies/ || exit 1
+          done

@@ -1,0 +1,30 @@
+/**
+ * RIP Design Tokens — Spacing
+ * Source of truth: design-tokens.md §5
+ * Base unit: 4px
+ */
+
+:root {
+  --rip-space-0: 0;
+  --rip-space-1: 0.25rem;
+  --rip-space-2: 0.5rem;
+  --rip-space-3: 0.75rem;
+  --rip-space-4: 1rem;
+  --rip-space-5: 1.25rem;
+  --rip-space-6: 1.5rem;
+  --rip-space-8: 2rem;
+  --rip-space-10: 2.5rem;
+  --rip-space-12: 3rem;
+  --rip-space-16: 4rem;
+}
+
+:root,
+:root[data-density="compact"] {
+  --rip-component-padding: var(--rip-space-4);
+  --rip-section-gap: var(--rip-space-4);
+}
+
+:root[data-density="comfortable"] {
+  --rip-component-padding: var(--rip-space-6);
+  --rip-section-gap: var(--rip-space-8);
+}

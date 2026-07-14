@@ -1,0 +1,53 @@
+/**
+ * RIP Design Tokens — Primitives
+ * Source of truth: design-tokens.md §3.1
+ * OKLCH exclusively. Never import directly in components — use semantic tokens.
+ */
+
+:root {
+  /* Neutral ramp — hue 250° cool operational neutral */
+  --rip-neutral-0: oklch(0.99 0.005 250);
+  --rip-neutral-50: oklch(0.97 0.006 250);
+  --rip-neutral-100: oklch(0.94 0.007 250);
+  --rip-neutral-200: oklch(0.90 0.008 250);
+  --rip-neutral-300: oklch(0.82 0.009 250);
+  --rip-neutral-400: oklch(0.70 0.010 250);
+  --rip-neutral-500: oklch(0.55 0.010 250);
+  --rip-neutral-600: oklch(0.45 0.009 250);
+  --rip-neutral-700: oklch(0.35 0.008 250);
+  --rip-neutral-800: oklch(0.25 0.007 250);
+  --rip-neutral-900: oklch(0.18 0.006 250);
+  --rip-neutral-950: oklch(0.12 0.005 250);
+
+  /* Brand accent */
+  --rip-brand-400: oklch(0.72 0.14 250);
+  --rip-brand-500: oklch(0.58 0.16 250);
+  --rip-brand-600: oklch(0.48 0.15 250);
+  --rip-brand-700: oklch(0.40 0.13 250);
+
+  /* Semantic status */
+  --rip-success-500: oklch(0.55 0.14 145);
+  --rip-warning-500: oklch(0.72 0.16 75);
+  --rip-destructive-500: oklch(0.55 0.20 25);
+  --rip-info-500: oklch(0.58 0.12 230);
+}
+
+.dark {
+  --rip-neutral-0: oklch(0.14 0.012 250);
+  --rip-neutral-50: oklch(0.17 0.012 250);
+  --rip-neutral-100: oklch(0.20 0.013 250);
+  --rip-neutral-200: oklch(0.24 0.014 250);
+  --rip-neutral-300: oklch(0.30 0.015 250);
+  --rip-neutral-400: oklch(0.40 0.014 250);
+  --rip-neutral-500: oklch(0.55 0.012 250);
+  --rip-neutral-600: oklch(0.65 0.010 250);
+  --rip-neutral-700: oklch(0.75 0.008 250);
+  --rip-neutral-800: oklch(0.85 0.006 250);
+  --rip-neutral-900: oklch(0.93 0.005 250);
+  --rip-neutral-950: oklch(0.98 0.004 250);
+
+  --rip-brand-400: oklch(0.72 0.14 250);
+  --rip-brand-500: oklch(0.58 0.16 250);
+  --rip-brand-600: oklch(0.48 0.15 250);
+  --rip-brand-700: oklch(0.40 0.13 250);
+}

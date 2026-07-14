@@ -1,0 +1,58 @@
+/**
+ * RIP Design Tokens — Component
+ * Source of truth: design-tokens.md §9
+ */
+
+:root {
+  /* Button */
+  --rip-button-height: 2.25rem;
+  --rip-button-padding-x: 1rem;
+  --rip-button-padding-y: 0.75rem;
+  --rip-button-radius: var(--rip-radius-md);
+  --rip-button-primary-bg: var(--rip-brand);
+  --rip-button-primary-fg: var(--rip-brand-fg);
+  --rip-button-secondary-border: var(--rip-border-default);
+  --rip-button-destructive-bg: var(--rip-destructive-500);
+  --rip-button-destructive-fg: oklch(0.99 0 0);
+
+  /* Input / Select */
+  --rip-input-bg: var(--rip-bg-inset);
+  --rip-input-border: var(--rip-border-default);
+  --rip-input-focus-ring: var(--rip-border-focus);
+  --rip-input-height: 2.25rem;
+  --rip-input-height-comfortable: 2.5rem;
+  --rip-input-font-size: var(--rip-text-base);
+
+  /* Card */
+  --rip-card-bg: var(--rip-bg-surface);
+  --rip-card-border: var(--rip-border-subtle);
+  --rip-card-radius: var(--rip-radius-lg);
+  --rip-card-padding-compact: var(--rip-space-4);
+  --rip-card-padding-comfortable: var(--rip-space-6);
+
+  /* Sidebar */
+  --rip-sidebar-width: 260px;
+  --rip-sidebar-bg: var(--rip-bg-canvas);
+  --rip-sidebar-border: var(--rip-border-subtle);
+
+  /* Table */
+  --rip-table-row-height-compact: 2.5rem;
+  --rip-table-row-height-comfortable: 3rem;
+  --rip-table-header-color: var(--rip-fg-tertiary);
+
+  /* Alert severity backgrounds (no side-stripe) */
+  --rip-alert-critical-bg: oklch(0.55 0.20 25 / 0.08);
+  --rip-alert-warning-bg: oklch(0.72 0.16 75 / 0.08);
+  --rip-alert-info-bg: oklch(0.58 0.12 230 / 0.08);
+
+  /* R3F canvas */
+  --rip-twin-floor-grid: var(--rip-border-subtle);
+  --rip-twin-fixture-light: var(--rip-neutral-300);
+  --rip-twin-fixture-dark: var(--rip-neutral-600);
+  --rip-twin-tracklet: var(--rip-brand-500);
+  --rip-twin-suspect: var(--rip-destructive-500);
+
+  /* Accessibility */
+  --rip-skip-link-bg: var(--rip-brand);
+  --rip-skip-link-fg: var(--rip-brand-fg);
+}

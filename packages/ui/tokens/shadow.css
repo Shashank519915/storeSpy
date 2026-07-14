@@ -1,0 +1,18 @@
+/**
+ * RIP Design Tokens — Shadow
+ * Source of truth: design-tokens.md §7
+ * Borders-only depth strategy — shadows are minimal / none on cards
+ */
+
+:root {
+  --rip-shadow-none: none;
+  --rip-shadow-sm: 0 1px 2px oklch(0.12 0.005 250 / 0.04);
+  --rip-shadow-md: 0 4px 12px oklch(0.12 0.005 250 / 0.06);
+  --rip-shadow-modal: 0 8px 24px oklch(0.12 0.005 250 / 0.12);
+}
+
+.dark {
+  --rip-shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
+  --rip-shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+  --rip-shadow-modal: 0 8px 24px oklch(0 0 0 / 0.4);
+}

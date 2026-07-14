@@ -1,0 +1,11 @@
+{
+  "extends": "@rip/ts-config/tsconfig.strict.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "noEmit": false,
+    "declaration": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

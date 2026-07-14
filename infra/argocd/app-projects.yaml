@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: portal
+  namespace: argocd
+spec:
+  description: Next.js enterprise portal
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: rip-portal
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: api
+  namespace: argocd
+spec:
+  description: API gateway and backend services
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: rip-api
+      server: https://kubernetes.default.svc
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: reasoning
+  namespace: argocd
+spec:
+  description: LP engine, checkout verification, session reconstruction
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: rip-reasoning
+      server: https://kubernetes.default.svc
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra
+  namespace: argocd
+spec:
+  description: Platform infrastructure (Vault, OTel, Istio, monitoring)
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: rip-system
+      server: https://kubernetes.default.svc
+    - namespace: istio-system
+      server: https://kubernetes.default.svc

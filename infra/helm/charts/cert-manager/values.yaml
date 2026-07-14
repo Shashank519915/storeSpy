@@ -1,0 +1,16 @@
+# cert-manager with Vault issuer
+# Ticket: RIP-0-032
+
+installCRDs: true
+
+extraArgs:
+  - --enable-certificate-owner-ref=true
+
+vaultIssuer:
+  enabled: true
+  server: https://vault.rip-system.svc.cluster.local:8200
+  path: pki_int/sign/rip-internal-ca
+  auth:
+    kubernetes:
+      role: cert-manager
+      mountPath: /v1/auth/kubernetes

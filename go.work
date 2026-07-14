@@ -1,0 +1,16 @@
+go 1.22
+
+use (
+	./apps/api-gateway
+	./apps/checkout-verification
+	./apps/event-injector
+	./apps/lp-engine
+	./apps/session-reconstruction
+	./apps/spatial-query
+	./apps/twin-api
+	./services/edge/edge-bridge
+	./services/edge/hls-transcoder
+	./services/edge/pos-agent
+	./services/edge/state-publisher
+	./services/sim/replay-driver
+)
