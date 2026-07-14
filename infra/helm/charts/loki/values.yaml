@@ -1,0 +1,15 @@
+# Loki distributed mode
+# Ticket: RIP-0-035
+
+deploymentMode: Distributed
+
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 3
+  storage:
+    type: s3
+    bucketNames:
+      chunks: rip-loki-chunks
+      ruler: rip-loki-ruler
+      admin: rip-loki-admin

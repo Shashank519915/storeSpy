@@ -1,0 +1,58 @@
+# RIP Build & Push — OIDC to AWS ECR
+# Ticket: RIP-0-050
+
+name: Build & Push
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "services/**"
+      - "infra/docker/**"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - portal
+          - edge-bridge
+          - cv-orchestrator
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/rip-dev-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/base-cv-runtime/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/rip/${{ matrix.service }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/rip/${{ matrix.service }}:main
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@import "@rip/ui/tokens";
+@import "@rip/ui/tokens/tailwind-bridge.css";
+
+/* shadcn/ui variable mapping — design-tokens.md §10.1 */
+:root {
+  --background: var(--rip-bg-canvas);
+  --foreground: var(--rip-fg-primary);
+  --card: var(--rip-bg-surface);
+  --card-foreground: var(--rip-fg-primary);
+  --popover: var(--rip-bg-surface-raised);
+  --popover-foreground: var(--rip-fg-primary);
+  --primary: var(--rip-brand);
+  --primary-foreground: var(--rip-brand-fg);
+  --secondary: var(--rip-neutral-100);
+  --secondary-foreground: var(--rip-fg-primary);
+  --muted: var(--rip-neutral-100);
+  --muted-foreground: var(--rip-fg-secondary);
+  --accent: var(--rip-neutral-100);
+  --accent-foreground: var(--rip-fg-primary);
+  --destructive: var(--rip-destructive-500);
+  --border: var(--rip-border-default);
+  --input: var(--rip-border-default);
+  --ring: var(--rip-border-focus);
+  --radius: var(--rip-radius-md);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border);
+  }
+
+  html {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--rip-font-sans);
+    font-size: var(--rip-text-base);
+    line-height: var(--rip-leading-base);
+  }
+
+  [data-density="compact"] body,
+  :root:not([data-density]) body {
+    font-size: var(--rip-text-base);
+  }
+
+  [data-density="comfortable"] body {
+    font-size: var(--rip-text-md);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    z-index: var(--rip-z-tooltip);
+    background: var(--rip-skip-link-bg);
+    color: var(--rip-skip-link-fg);
+    padding: var(--rip-space-2) var(--rip-space-4);
+    border-radius: var(--rip-radius-md);
+  }
+
+  .skip-link:focus {
+    position: fixed;
+    left: var(--rip-space-4);
+    top: var(--rip-space-4);
+    width: auto;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

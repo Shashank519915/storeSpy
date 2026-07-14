@@ -1,0 +1,24 @@
+# SPIRE Server (cloud) + Agent (edge) federation
+# Ticket: RIP-0-044
+
+server:
+  enabled: true
+  namespace: rip-system
+  upstreamAuthority:
+    vault:
+      enabled: true
+      vaultAddr: https://vault.rip-system.svc.cluster.local:8200
+      pkiMountPath: pki_int
+      certAuthRoleName: spire-server
+
+agent:
+  enabled: true
+  attestation:
+    k8s_psat:
+      enabled: true
+  svid_ttl: 1h
+  renewal_threshold: 0.8
+
+federation:
+  trust_domain: rip.internal
+  edge_svid_template: "spiffe://rip.internal/edge/{store_id}/{node_id}"

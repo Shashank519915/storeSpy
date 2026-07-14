@@ -1,0 +1,20 @@
+# NVIDIA GPU Operator — K3s lab values
+# Ticket: RIP-0-042
+
+operator:
+  defaultRuntime: containerd
+
+driver:
+  version: "535"
+
+toolkit:
+  enabled: true
+
+devicePlugin:
+  enabled: true
+
+dcgmExporter:
+  enabled: true
+
+node-feature-discovery:
+  enabled: true

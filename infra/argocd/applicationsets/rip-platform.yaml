@@ -1,0 +1,70 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: rip-apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/rip-platform/rip.git
+        revision: main
+        directories:
+          - path: apps/*
+  template:
+    metadata:
+      name: "{{path.basename}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "2"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/rip-platform/rip.git
+        targetRevision: main
+        path: "{{path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "rip-{{path.basename}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: rip-infra
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: otel-collector
+            path: infra/helm/charts/otel-collector
+            wave: "1"
+          - name: vault
+            path: infra/helm/charts/vault
+            wave: "0"
+          - name: network-policies
+            path: infra/helm/charts/network-policies
+            wave: "0"
+  template:
+    metadata:
+      name: "{{name}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "{{wave}}"
+    spec:
+      project: infra
+      source:
+        repoURL: https://github.com/rip-platform/rip.git
+        targetRevision: main
+        path: "{{path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: rip-system
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

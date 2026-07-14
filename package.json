@@ -1,0 +1,26 @@
+{
+  "name": "rip",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.5.0",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css,yaml,yml}\"",
+    "proto:lint": "buf lint packages/proto",
+    "proto:generate": "buf generate packages/proto"
+  },
+  "devDependencies": {
+    "@nx/js": "^21.0.0",
+    "nx": "^21.0.0",
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.4"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=11.0.0"
+  }
+}

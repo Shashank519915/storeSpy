@@ -1,0 +1,19 @@
+apiVersion: fleet.cattle.io/v1alpha1
+kind: Bundle
+metadata:
+  name: rip-edge-agent
+  namespace: fleet-default
+spec:
+  targets:
+    - clusterSelector:
+        matchLabels:
+          rip.io/cluster-type: edge
+  resources:
+    - content: |
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: cattle-fleet-system
+    - content: |
+        # Rancher Fleet agent installed via Helm
+        # GitOps reconcile loop for edge manifests in edge/k3s-manifests/

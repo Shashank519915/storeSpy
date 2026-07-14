@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+out/
+*.tsbuildinfo
+
+# Go
+bin/
+vendor/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.uv/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+
+# Rust
+target/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env & secrets (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+kubeconfig
+**/kubeconfig*
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+
+# Generated proto (Go/Python — CI only; TS committed)
+packages/proto/gen/go/
+packages/proto/gen/python/
+
+# ML artifacts
+ml/golden-datasets/**/*.mp4
+ml/golden-datasets/**/*.parquet
+ml/triton-model-repo/**/*.engine
+
+# Logs & coverage
+*.log
+coverage/
+.nyc_output/
+
+# Nx
+.nx/cache

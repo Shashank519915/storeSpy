@@ -1,0 +1,40 @@
+/**
+ * RIP Design Tokens — Typography
+ * Source of truth: design-tokens.md §4
+ */
+
+:root {
+  --rip-font-sans: "Geist Sans", "Inter", system-ui, sans-serif;
+  --rip-font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+  --rip-font-display: var(--rip-font-sans);
+
+  --rip-text-caption: 0.6875rem;
+  --rip-text-xs: 0.75rem;
+  --rip-text-sm: 0.8125rem;
+  --rip-text-base: 0.875rem;
+  --rip-text-md: 1rem;
+  --rip-text-lg: 1.125rem;
+  --rip-text-xl: 1.375rem;
+  --rip-text-2xl: 1.75rem;
+  --rip-text-display: clamp(2rem, 4vw, 3.5rem);
+
+  --rip-leading-caption: 1.35;
+  --rip-leading-xs: 1.4;
+  --rip-leading-sm: 1.45;
+  --rip-leading-base: 1.5;
+  --rip-leading-md: 1.5;
+  --rip-leading-lg: 1.4;
+  --rip-leading-xl: 1.3;
+  --rip-leading-2xl: 1.2;
+  --rip-leading-display: 1.1;
+
+  --rip-tracking-caption: 0.02em;
+  --rip-tracking-lg: -0.01em;
+  --rip-tracking-xl: -0.02em;
+  --rip-tracking-2xl: -0.03em;
+  --rip-tracking-display: -0.03em;
+}
+
+[data-density="comfortable"] {
+  --rip-text-base: var(--rip-text-md);
+}

@@ -1,0 +1,41 @@
+/**
+ * RIP Design Tokens — Semantic
+ * Source of truth: design-tokens.md §3.2
+ */
+
+:root {
+  --rip-bg-canvas: var(--rip-neutral-0);
+  --rip-bg-surface: var(--rip-neutral-50);
+  --rip-bg-surface-raised: var(--rip-neutral-100);
+  --rip-bg-inset: var(--rip-neutral-100);
+
+  --rip-fg-primary: var(--rip-neutral-900);
+  --rip-fg-secondary: var(--rip-neutral-600);
+  --rip-fg-tertiary: var(--rip-neutral-500);
+  --rip-fg-muted: var(--rip-neutral-400);
+
+  --rip-border-default: oklch(0.90 0.008 250 / 0.6);
+  --rip-border-subtle: oklch(0.94 0.007 250 / 0.5);
+  --rip-border-emphasis: oklch(0.82 0.009 250 / 0.7);
+  --rip-border-focus: var(--rip-brand-500);
+
+  --rip-brand: var(--rip-brand-500);
+  --rip-brand-fg: oklch(0.99 0 0);
+}
+
+.dark {
+  --rip-bg-inset: var(--rip-neutral-50);
+
+  --rip-fg-primary: var(--rip-neutral-800);
+  --rip-fg-secondary: var(--rip-neutral-600);
+  --rip-fg-tertiary: var(--rip-neutral-500);
+  --rip-fg-muted: var(--rip-neutral-400);
+
+  --rip-border-default: oklch(1 0 0 / 0.08);
+  --rip-border-subtle: oklch(1 0 0 / 0.05);
+  --rip-border-emphasis: oklch(1 0 0 / 0.12);
+  --rip-border-focus: var(--rip-brand-400);
+
+  --rip-brand: var(--rip-brand-400);
+  --rip-brand-fg: oklch(0.12 0.005 250);
+}

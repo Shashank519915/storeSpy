@@ -1,0 +1,24 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "services/edge/*"
+  - "services/sim/*"
+
+allowBuilds:
+  nx: true
+  sharp: true
+
+catalog:
+  typescript: ^5.8.3
+  eslint: ^9.28.0
+  "@types/node": ^22.15.0
+  next: ^15.3.3
+  react: ^19.1.0
+  react-dom: ^19.1.0
+  tailwindcss: ^4.1.8
+  "@tailwindcss/postcss": ^4.1.8
+
+onlyBuiltDependencies:
+  - esbuild
+  - nx
+  - sharp

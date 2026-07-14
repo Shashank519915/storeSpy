@@ -1,0 +1,33 @@
+/**
+ * RIP Design Tokens — Motion
+ * Source of truth: design-tokens.md §8
+ */
+
+:root {
+  --rip-duration-instant: 100ms;
+  --rip-duration-fast: 150ms;
+  --rip-duration-normal: 200ms;
+  --rip-duration-slow: 300ms;
+  --rip-duration-evidence: 100ms;
+
+  --rip-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --rip-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --rip-ease-spring: cubic-bezier(0.2, 0, 0, 1);
+
+  --rip-z-dropdown: 50;
+  --rip-z-sticky: 100;
+  --rip-z-modal-backdrop: 200;
+  --rip-z-modal: 210;
+  --rip-z-toast: 300;
+  --rip-z-tooltip: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rip-duration-instant: 0ms;
+    --rip-duration-fast: 0ms;
+    --rip-duration-normal: 0ms;
+    --rip-duration-slow: 0ms;
+    --rip-duration-evidence: 0ms;
+  }
+}

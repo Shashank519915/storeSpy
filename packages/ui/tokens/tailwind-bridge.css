@@ -1,0 +1,59 @@
+/**
+ * RIP Design Tokens — Tailwind v4 @theme bridge
+ * Source of truth: design-tokens.md §2.3, §10.1
+ * Imported by apps/portal/app/globals.css
+ */
+
+@theme {
+  /* Colors */
+  --color-background: var(--rip-bg-canvas);
+  --color-foreground: var(--rip-fg-primary);
+  --color-card: var(--rip-bg-surface);
+  --color-card-foreground: var(--rip-fg-primary);
+  --color-popover: var(--rip-bg-surface-raised);
+  --color-popover-foreground: var(--rip-fg-primary);
+  --color-primary: var(--rip-brand);
+  --color-primary-foreground: var(--rip-brand-fg);
+  --color-secondary: var(--rip-neutral-100);
+  --color-secondary-foreground: var(--rip-fg-primary);
+  --color-muted: var(--rip-neutral-100);
+  --color-muted-foreground: var(--rip-fg-secondary);
+  --color-accent: var(--rip-neutral-100);
+  --color-accent-foreground: var(--rip-fg-primary);
+  --color-destructive: var(--rip-destructive-500);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-border: var(--rip-border-default);
+  --color-input: var(--rip-border-default);
+  --color-ring: var(--rip-border-focus);
+
+  /* Domain */
+  --color-theft-low: var(--rip-theft-score-low);
+  --color-theft-medium: var(--rip-theft-score-medium);
+  --color-theft-high: var(--rip-theft-score-high);
+  --color-theft-critical: var(--rip-theft-score-critical);
+  --color-camera-online: var(--rip-camera-online);
+  --color-camera-degraded: var(--rip-camera-degraded);
+  --color-camera-offline: var(--rip-camera-offline);
+
+  /* Radius */
+  --radius-sm: var(--rip-radius-sm);
+  --radius-md: var(--rip-radius-md);
+  --radius-lg: var(--rip-radius-lg);
+  --radius-xl: var(--rip-radius-xl);
+
+  /* Spacing (subset — full scale via CSS vars) */
+  --spacing-rip-1: var(--rip-space-1);
+  --spacing-rip-2: var(--rip-space-2);
+  --spacing-rip-3: var(--rip-space-3);
+  --spacing-rip-4: var(--rip-space-4);
+  --spacing-rip-6: var(--rip-space-6);
+  --spacing-rip-8: var(--rip-space-8);
+
+  /* Typography */
+  --font-sans: var(--rip-font-sans);
+  --font-mono: var(--rip-font-mono);
+
+  /* Motion */
+  --ease-rip-out: var(--rip-ease-out);
+  --ease-rip-in-out: var(--rip-ease-in-out);
+}

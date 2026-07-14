@@ -1,0 +1,44 @@
+# Vault HA on EKS — 3 replicas, Raft storage, AWS KMS auto-unseal
+# Ticket: RIP-0-020
+
+global:
+  enabled: true
+  tlsDisable: false
+
+server:
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+        listener "tcp" {
+          tls_disable = 0
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          tls_cert_file = "/vault/userconfig/vault-tls/tls.crt"
+          tls_key_file = "/vault/userconfig/vault-tls/tls.key"
+        }
+        storage "raft" {
+          path = "/vault/data"
+        }
+        seal "awskms" {
+          region = "us-east-1"
+          kms_key_id = "alias/rip-vault-unseal"
+        }
+        service_registration "kubernetes" {}
+  auditStorage:
+    enabled: true
+    type: s3
+    s3:
+      bucket: rip-vault-audit
+      region: us-east-1
+
+injector:
+  enabled: true
+
+ui:
+  enabled: true
+  serviceType: ClusterIP

@@ -1,0 +1,61 @@
+---
+# WireGuard outbound tunnel — edge initiates, cloud accepts
+# Ticket: RIP-0-045
+- name: WireGuard Edge Tunnel
+  hosts: edge_nodes
+  become: true
+  vars:
+    wg_interface: wg0
+    wg_cloud_endpoint: "{{ lookup('env', 'WG_CLOUD_ENDPOINT') }}"
+    wg_cloud_public_key: "{{ lookup('env', 'WG_CLOUD_PUBLIC_KEY') }}"
+    wg_allowed_ips: "10.200.0.0/16"
+    wg_persistent_keepalive: 25
+  tasks:
+    - name: Install WireGuard
+      ansible.builtin.apt:
+        name:
+          - wireguard
+          - wireguard-tools
+        state: present
+
+    - name: Generate edge keypair
+      ansible.builtin.command: wg genkey
+      register: wg_private_key
+      changed_when: false
+      no_log: true
+
+    - name: Derive public key
+      ansible.builtin.shell: echo "{{ wg_private_key.stdout }}" | wg pubkey
+      register: wg_public_key
+      changed_when: false
+      no_log: true
+
+    - name: Write WireGuard config
+      ansible.builtin.copy:
+        dest: "/etc/wireguard/{{ wg_interface }}.conf"
+        mode: "0600"
+        content: |
+          [Interface]
+          PrivateKey = {{ wg_private_key.stdout }}
+          Address = 10.201.0.1/32
+
+          [Peer]
+          PublicKey = {{ wg_cloud_public_key }}
+          Endpoint = {{ wg_cloud_endpoint }}:51820
+          AllowedIPs = {{ wg_allowed_ips }}
+          PersistentKeepalive = {{ wg_persistent_keepalive }}
+
+    - name: Enable and start WireGuard
+      ansible.builtin.systemd:
+        name: "wg-quick@{{ wg_interface }}"
+        enabled: true
+        state: started
+
+    - name: Export handshake metric for node_exporter textfile
+      ansible.builtin.cron:
+        name: wireguard handshake exporter
+        minute: "*"
+        job: >
+          wg show {{ wg_interface }} latest-handshakes |
+          awk '{print "wireguard_latest_handshake_seconds{interface=\"{{ wg_interface }}\"} " (systime() - $2)}' >
+          /var/lib/node_exporter/textfile_collector/wireguard.prom

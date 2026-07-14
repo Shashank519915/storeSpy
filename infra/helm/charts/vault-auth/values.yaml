@@ -1,0 +1,27 @@
+# Vault Kubernetes Auth — per-service roles bound to K8s SA JWT
+# Ticket: RIP-0-024
+
+authRoles:
+  - name: api-gateway
+    boundServiceAccountNames: ["api-gateway"]
+    boundServiceAccountNamespaces: ["rip-system"]
+    policies: ["rip-api-gateway"]
+    ttl: "1h"
+
+  - name: portal
+    boundServiceAccountNames: ["portal"]
+    boundServiceAccountNamespaces: ["rip-system"]
+    policies: ["rip-portal-readonly"]
+    ttl: "1h"
+
+  - name: edge-bridge
+    boundServiceAccountNames: ["edge-bridge"]
+    boundServiceAccountNamespaces: ["rip-edge"]
+    policies: ["rip-edge-bridge"]
+    ttl: "1h"
+
+  - name: otel-collector
+    boundServiceAccountNames: ["otel-collector"]
+    boundServiceAccountNamespaces: ["rip-system"]
+    policies: ["rip-otel-readonly"]
+    ttl: "1h"

@@ -1,0 +1,25 @@
+# kube-prometheus-stack — Prometheus + Grafana + Alertmanager
+# Ticket: RIP-0-034
+
+grafana:
+  enabled: true
+  adminPassword: ""  # via ExternalSecret
+  persistence:
+    enabled: true
+
+alertmanager:
+  enabled: true
+  config:
+    receivers:
+      - name: pagerduty
+        pagerduty_configs:
+          - service_key_file: /etc/alertmanager/secrets/pagerduty-key
+
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+defaultRules:
+  create: true

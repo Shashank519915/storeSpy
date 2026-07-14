@@ -1,0 +1,59 @@
+# OpenTelemetry Collector — DaemonSet + Gateway
+# Ticket: RIP-0-033
+
+mode: daemonset
+
+presets:
+  kubernetesAttributes:
+    enabled: true
+  hostMetrics:
+    enabled: true
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  processors:
+    batch:
+      timeout: 5s
+      send_batch_size: 1024
+    memory_limiter:
+      check_interval: 1s
+      limit_mib: 512
+
+  exporters:
+    otlp/tempo:
+      endpoint: tempo.rip-system.svc.cluster.local:4317
+      tls:
+        insecure: true
+    loki:
+      endpoint: http://loki-gateway.rip-system.svc.cluster.local/loki/api/v1/push
+    prometheus:
+      endpoint: 0.0.0.0:8889
+
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [otlp/tempo]
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [loki]
+      metrics:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [prometheus]
+
+ports:
+  otlp:
+    enabled: true
+    containerPort: 4317
+    servicePort: 4317
+    protocol: TCP

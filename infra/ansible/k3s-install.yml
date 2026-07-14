@@ -1,0 +1,39 @@
+---
+# K3s single-node install with SQLite backend
+# Ticket: RIP-0-041
+- name: K3s Install
+  hosts: edge_nodes
+  become: true
+  vars:
+    k3s_version: v1.29.5+k3s1
+    k3s_token: "{{ lookup('env', 'K3S_TOKEN') }}"
+  tasks:
+    - name: Download K3s install script
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: "0755"
+
+    - name: Install K3s server
+      ansible.builtin.shell: |
+        INSTALL_K3S_VERSION="{{ k3s_version }}" \
+        K3S_TOKEN="{{ k3s_token }}" \
+        /tmp/k3s-install.sh
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Export kubeconfig
+      ansible.builtin.fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ playbook_dir }}/../../edge/k3s-manifests/kubeconfig-{{ inventory_hostname }}"
+        flat: true
+
+    - name: Wait for K3s node Ready
+      ansible.builtin.command: kubectl get nodes
+      register: k3s_nodes
+      until: "'Ready' in k3s_nodes.stdout"
+      retries: 12
+      delay: 10
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
