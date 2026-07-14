@@ -60,7 +60,12 @@ locals {
 
   # CIDR planning — see docs/runbooks/network-cidr.md
   vpc_cidr = "10.0.0.0/16"
+
+  # Predictable S3 name — known at plan time (avoids count dependency on module output)
+  terraform_state_bucket_arn = "arn:aws:s3:::rip-terraform-state-${data.aws_caller_identity.current.account_id}"
 }
+
+data "aws_caller_identity" "current" {}
 
 module "s3_foundation" {
   source = "../../modules/s3-foundation"
@@ -75,7 +80,7 @@ module "vpc" {
   cidr_block           = local.vpc_cidr
   az_count             = 3
   enable_flow_logs     = true
-  flow_logs_bucket_arn = module.s3_foundation.terraform_state_bucket_arn
+  flow_logs_bucket_arn = local.terraform_state_bucket_arn
   tags                 = local.common_tags
 }
 

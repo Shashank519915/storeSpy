@@ -166,7 +166,7 @@ resource "aws_db_subnet_group" "main" {
 }
 
 resource "aws_flow_log" "main" {
-  count                = var.enable_flow_logs && var.flow_logs_bucket_arn != "" ? 1 : 0
+  count                = var.enable_flow_logs ? 1 : 0
   log_destination      = var.flow_logs_bucket_arn
   log_destination_type = "s3"
   traffic_type         = "ALL"
