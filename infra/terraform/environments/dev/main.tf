@@ -53,6 +53,12 @@ variable "github_repo" {
   default = "storeSpy"
 }
 
+variable "enable_msk" {
+  type        = bool
+  default     = true
+  description = "Provision Amazon MSK (3× kafka.t3.small). Disable to skip Kafka cost during early scaffold work."
+}
+
 locals {
   name = "rip-${var.environment}"
 
@@ -134,6 +140,37 @@ module "vault_prerequisites" {
   tags                      = local.common_tags
 }
 
+module "msk" {
+  count  = var.enable_msk ? 1 : 0
+  source = "../../modules/msk"
+
+  name                 = local.name
+  vpc_id               = module.vpc.vpc_id
+  vpc_cidr             = local.vpc_cidr
+  private_subnet_ids   = module.vpc.private_subnet_ids
+  broker_instance_type = "kafka.t3.small"
+  broker_count         = 3
+  tags                 = local.common_tags
+}
+
+module "msk_topics" {
+  source      = "../../modules/msk-topics"
+  environment = var.environment
+}
+
+module "msk_iam" {
+  count  = var.enable_msk ? 1 : 0
+  source = "../../modules/msk-iam"
+
+  name                      = local.name
+  cluster_arn               = module.msk[0].cluster_arn
+  cluster_name              = module.msk[0].cluster_name
+  cluster_uuid              = module.msk[0].cluster_uuid
+  cluster_oidc_provider_arn = module.eks.oidc_provider_arn
+  cluster_oidc_issuer_url   = module.eks.cluster_oidc_issuer_url
+  tags                      = local.common_tags
+}
+
 output "vpc_id" {
   value = module.vpc.vpc_id
 }
@@ -160,4 +197,21 @@ output "vault_irsa_role_arn" {
 
 output "vault_kms_key_alias" {
   value = module.vault_prerequisites.kms_key_alias
+}
+
+output "msk_cluster_arn" {
+  value = var.enable_msk ? module.msk[0].cluster_arn : null
+}
+
+output "msk_bootstrap_brokers_sasl_iam" {
+  value     = var.enable_msk ? module.msk[0].bootstrap_brokers_sasl_iam : null
+  sensitive = true
+}
+
+output "msk_topic_manifest" {
+  value = module.msk_topics.topics
+}
+
+output "msk_admin_role_arn" {
+  value = var.enable_msk ? module.msk_iam[0].msk_admin_role_arn : null
 }

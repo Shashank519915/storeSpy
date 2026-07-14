@@ -1,0 +1,21 @@
+# Confluent Schema Registry on EKS — Protobuf, BACKWARD_TRANSITIVE
+# Ticket: RIP-1-013
+
+replicaCount: 1
+
+image: confluentinc/cp-schema-registry:7.6.0
+
+kafka:
+  bootstrapServers: ""  # set at deploy: MSK bootstrap_brokers_sasl_iam
+  topic: _schemas
+  groupId: rip-schema-registry
+
+schemaRegistry:
+  compatibilityLevel: BACKWARD_TRANSITIVE
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

@@ -1,0 +1,18 @@
+# Dev bootstrap — single replica, minimal resources (t3.small EKS)
+# Deploy after MSK is ACTIVE:
+#   helm upgrade --install schema-registry confluentinc/schema-registry \
+#     -n rip-system -f values.yaml -f values-dev.yaml \
+#     --set kafka.bootstrapServers=<bootstrap_brokers_sasl_iam>
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+# MSK IAM auth — requires custom client.properties mounted as secret (see runbook)
+kafka:
+  topic: _schemas

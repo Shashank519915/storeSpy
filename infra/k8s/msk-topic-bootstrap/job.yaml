@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: msk-topic-bootstrap
+  namespace: rip-system
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      serviceAccountName: msk-admin
+      restartPolicy: OnFailure
+      initContainers:
+        - name: fetch-msk-iam-auth
+          image: curlimages/curl:8.7.1
+          command:
+            - sh
+            - -c
+            - |
+              curl -fsSL -o /plugins/aws-msk-iam-auth.jar \
+                https://github.com/aws/aws-msk-iam-auth/releases/download/v2.2.0/aws-msk-iam-auth-2.2.0-all.jar
+          volumeMounts:
+            - name: plugins
+              mountPath: /plugins
+      containers:
+        - name: bootstrap
+          image: confluentinc/cp-kafka:7.6.0
+          securityContext:
+            runAsUser: 0
+          command:
+            - bash
+            - -c
+            - |
+              microdnf install -y python3 2>/dev/null || yum install -y python3
+              python3 /scripts/create-topics.py
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: REPLACE_BOOTSTRAP_SERVERS
+            - name: KAFKA_BIN
+              value: /usr/bin/kafka-topics
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: scripts
+              mountPath: /scripts
+            - name: plugins
+              mountPath: /plugins
+      volumes:
+        - name: config
+          configMap:
+            name: msk-topic-bootstrap-config
+        - name: scripts
+          configMap:
+            name: msk-topic-bootstrap-scripts
+        - name: plugins
+          emptyDir: {}

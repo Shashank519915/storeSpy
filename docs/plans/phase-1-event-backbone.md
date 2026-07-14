@@ -45,6 +45,14 @@ Deploy the immutable event nervous system (Kafka MSK + Schema Registry + Debeziu
 - [x] RIP-1-030 — `infra/migrations/001_outbox.sql`
 - [x] RIP-1-014 — `docs/runbooks/kafka-serde.md`
 - [ ] RIP-1-010+ — MSK Terraform, Schema Registry Helm, remaining persistence tier
+- [x] RIP-1-010 — Terraform module `msk` (3× `kafka.t3.small`, TLS, IAM auth)
+- [x] RIP-1-011 — Topic manifest `msk-topics` + EKS bootstrap Job
+- [x] RIP-1-012 — Partition strategy documented (`kafka-topic-catalog.md`)
+- [x] RIP-1-015 — DLQ + retry topics per consumer domain
+- [x] RIP-1-016 — MSK IAM roles (`msk-iam`: admin, producer, consumer)
+- [x] RIP-1-013 — Schema Registry Helm values scaffold
+- [ ] RIP-1-013 live — deploy Schema Registry after MSK ACTIVE
+- [ ] RIP-1-014 — Wire Serde end-to-end with live registry
 
 ### 1.1 Protobuf Schema Foundation
 | Ticket ID | Task | Output Path |
