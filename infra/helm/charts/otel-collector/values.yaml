@@ -1,6 +1,9 @@
 # OpenTelemetry Collector — DaemonSet + Gateway
 # Ticket: RIP-0-033
 
+image:
+  repository: otel/opentelemetry-collector-contrib
+
 mode: daemonset
 
 presets:

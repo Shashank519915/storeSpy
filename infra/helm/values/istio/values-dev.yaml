@@ -1,0 +1,19 @@
+# Dev bootstrap — istiod on t3.micro (~530Mi allocatable per node)
+pilot:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+global:
+  proxy:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 128Mi

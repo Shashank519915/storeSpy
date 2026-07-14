@@ -60,7 +60,9 @@ helm @vaultArgs
 
 Write-Host "==> Wave 1 — Istio"
 helm upgrade --install istio-base istio/base -n istio-system --create-namespace --wait --timeout 10m
-helm upgrade --install istiod istio/istiod -n istio-system --wait --timeout 10m
+helm upgrade --install istiod istio/istiod -n istio-system `
+  -f infra/helm/values/istio/values-dev.yaml `
+  --wait --timeout 10m
 kubectl apply -f infra/helm/values/istio/peer-authentication.yaml
 
 Write-Host "==> Wave 1 — OpenTelemetry Collector"

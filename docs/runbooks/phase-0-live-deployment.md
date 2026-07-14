@@ -177,7 +177,7 @@ These choices are encoded in `infra/terraform/environments/dev/main.tf` and modu
 | **AWS region** | `us-east-1` | TFC workspace var `AWS_DEFAULT_REGION`; all resources live here |
 | **HCP Terraform** | VCS + auto-apply on `main` | Full repo clone resolves `../../modules`; push triggers apply |
 | **EKS Kubernetes version** | `1.31` | `1.29` unsupported in AWS by Jul 2026 |
-| **EKS node instance types** | `t3.micro` (system + workload) | New AWS accounts only allow free-tier-eligible types until billing is verified |
+| **EKS node instance types** | `t3.small` (system + workload) | `t3.micro` only fits cluster bootstrap (4 pods/node); platform Helm needs `t3.small+` |
 | **EKS node counts** | 1 system + 1 workload | Minimal cost; enough to bootstrap Helm/platform charts |
 | **GuardDuty** | Disabled (`enable_guardduty = false`) | New accounts hit `SubscriptionRequiredException` until GuardDuty is subscribed |
 | **CI deploy ECR policy** | Wildcard `arn:aws:ecr:us-east-1:*:repository/rip/*` | No ECR repos exist yet at first apply |
@@ -207,7 +207,8 @@ Push to `main` → VCS triggers plan/apply. Expect node group **replace** (rolli
 
 | Tier | Suggested instance types | Node counts | Notes |
 |------|------------------------|-------------|-------|
-| **Dev (bootstrap)** | `t3.micro` | 1 + 1 | Current; fine for Helm smoke test |
+| **Dev (bootstrap)** | `t3.micro` | 1 + 1 | EKS API only — not enough pod slots for platform |
+| **Dev (platform)** | `t3.small` | 1 + 1 | Current minimum for Vault + Istio + ArgoCD |
 | **Dev (paid)** | `t3.medium` or `m6i.large` | 2 + 2 | Comfortable for Vault + Istio + ArgoCD |
 | **Staging** | `m6i.xlarge` | 2 + 3 | Module defaults in `modules/eks` |
 | **Production** | `m6i.2xlarge`+ | Per capacity plan | Separate workspace `rip-prod` |
@@ -237,7 +238,7 @@ Requires **Local** execution mode (§1d) and `aws configure` on your PC.
 | `terraform: command not found` (fallback) | WinGet shim not in PATH | `& "$env:LOCALAPPDATA\Microsoft\WinGet\Links\terraform.exe" version` |
 | Plan fails with AWS auth error | Missing/wrong workspace variables | Re-check §1b; keys must be **Environment variables**, Sensitive checked |
 | VCS not triggering runs | Working directory wrong | Must be exactly `infra/terraform/environments/dev` |
-| `not eligible for Free Tier` on EKS node group | New account without billing verification | Dev uses `t3.micro` in `main.tf`; add a payment method in AWS Billing to use `m6i.*` |
+| `not eligible for Free Tier` on EKS node group | New account without billing verification | Dev bootstrap used `t3.micro`; platform Helm needs `t3.small+` in `main.tf` after adding a payment method |
 | EKS node group `CREATE_FAILED` after instance fix | Prior failed node groups still exist | EKS console → `rip-dev` → Compute → delete `rip-dev-system` and `rip-dev-workload`, then re-apply |
 | `aws: command not found` | AWS CLI not installed or PATH stale | `winget install Amazon.AWSCLI`, refresh PATH (§4), restart terminal |
 | EKS console shows 0 clusters | Wrong AWS region in browser | Switch console to **US East (N. Virginia) `us-east-1`** |

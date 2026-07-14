@@ -97,10 +97,10 @@ module "eks" {
   private_subnet_ids = module.vpc.private_subnet_ids
   tags               = local.common_tags
 
-  # New AWS accounts without billing verification only allow free-tier instance types.
-  # Upgrade to t3.medium+ after adding a payment method (see runbook troubleshooting).
-  system_instance_types   = ["t3.micro"]
-  workload_instance_types = ["t3.micro"]
+  # t3.micro fits Terraform/EKS bootstrap only (4 pods/node). Platform Helm needs t3.small+.
+  # Add a payment method in AWS Billing if apply fails on instance type eligibility.
+  system_instance_types   = ["t3.small"]
+  workload_instance_types = ["t3.small"]
   system_desired_size     = 1
   workload_desired_size   = 1
 }

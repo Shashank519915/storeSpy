@@ -1,5 +1,8 @@
-# Dev bootstrap — lighter collector on small nodes
+# Dev bootstrap — lighter collector on small nodes (Deployment, not DaemonSet — saves pod slots)
 # helm upgrade --install otel-collector open-telemetry/opentelemetry-collector -n rip-system -f values.yaml -f values-dev.yaml
+
+mode: deployment
+replicaCount: 1
 
 resources:
   requests:
@@ -9,6 +12,33 @@ resources:
     memory: 256Mi
 
 config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
   processors:
+    batch:
+      timeout: 5s
     memory_limiter:
+      check_interval: 1s
       limit_mib: 128
+  exporters:
+    debug:
+      verbosity: basic
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [debug]
+      metrics:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [debug]
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [debug]
