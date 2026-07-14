@@ -377,7 +377,7 @@ Progress as of live dev deploy (Jul 2026). Copy to issue/PR when fully done.
 - [x] Istio STRICT mTLS enforced (`PeerAuthentication` in `istio-system` + `rip-system`)
 - [x] ArgoCD running; `rip-infra` + `rip-apps` ApplicationSets syncing
 - [x] OTel collector deployed (dev deployment mode)
-- [ ] External Secrets `ClusterSecretStore` — apply after ESO pods ready (`external-secrets.io/v1`)
+- [x] External Secrets `ClusterSecretStore` `rip-vault` — Valid/Ready (dev uses `http://` Vault)
 - [ ] K3s lab + GPU + DCGM (if hardware available) — **Step E, optional**
 - [ ] SPIRE edge SVIDs (if edge node available) — **Step E, optional**
 - [ ] WireGuard 24h soak (if edge node available) — **Step E, optional**
