@@ -22,6 +22,16 @@ variable "tags" {
 
 data "aws_caller_identity" "current" {}
 
+data "aws_region" "current" {}
+
+locals {
+  ecr_repository_resources = length(var.ecr_repository_arns) > 0 ? var.ecr_repository_arns : [
+    "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/rip/*"
+  ]
+
+  terraform_state_bucket = "rip-terraform-state-${data.aws_caller_identity.current.account_id}"
+}
+
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
@@ -83,7 +93,7 @@ resource "aws_iam_role_policy" "ci_deploy_ecr" {
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload"
         ]
-        Resource = var.ecr_repository_arns
+        Resource = local.ecr_repository_resources
       },
       {
         Sid    = "TerraformPlanReadOnly"
@@ -95,8 +105,8 @@ resource "aws_iam_role_policy" "ci_deploy_ecr" {
           "dynamodb:Query"
         ]
         Resource = [
-          "arn:aws:s3:::rip-terraform-state",
-          "arn:aws:s3:::rip-terraform-state/*"
+          "arn:aws:s3:::${local.terraform_state_bucket}",
+          "arn:aws:s3:::${local.terraform_state_bucket}/*"
         ]
       }
     ]
