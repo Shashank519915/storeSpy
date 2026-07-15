@@ -13,7 +13,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$RepoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $RepoRoot
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
@@ -52,8 +52,10 @@ helm repo add icoretech https://icoretech.github.io/helm 2>$null
 helm repo update
 
 if (-not $RdsEndpoint) {
+  # Use --db-instance-identifier (avoid JMESPath [?...] which breaks PowerShell parsing)
   $RdsEndpoint = aws rds describe-db-instances `
-    --query "DBInstances[?DBInstanceIdentifier=='rip-dev-postgres'].Endpoint.Address" `
+    --db-instance-identifier rip-dev-postgres `
+    --query 'Endpoint.Address' `
     --output text 2>$null
   if (-not $RdsEndpoint -or $RdsEndpoint -eq "None") {
     if ($flags.enable_rds) {
@@ -66,7 +68,7 @@ if (-not $RdsEndpoint) {
 # Kafka bootstrap resolution (MSK > explicit param > in-cluster)
 if (-not $KafkaBootstrap) {
   if ($flags.enable_msk) {
-    Write-Warning "enable_msk=true — fetch bootstrap from TFC output msk_bootstrap_brokers_sasl_iam and pass -KafkaBootstrap"
+    Write-Warning "enable_msk=true: fetch bootstrap from TFC output msk_bootstrap_brokers_sasl_iam and pass -KafkaBootstrap"
   } elseif ($flags.enable_incluster_kafka -or $ForceKafkaDev) {
     $KafkaBootstrap = "kafka-dev.rip-system.svc.cluster.local:9092"
   }
@@ -85,7 +87,7 @@ if ($flags.enable_incluster_kafka -or $ForceKafkaDev) {
 }
 
 if ($RdsEndpoint) {
-  Write-Host "==> Deploying PgBouncer → $RdsEndpoint"
+  Write-Host "==> Deploying PgBouncer -> $RdsEndpoint"
   $secretJson = aws secretsmanager get-secret-value --secret-id rip-dev/rds/postgres --query SecretString --output text 2>$null
   $pgPassword = ""
   if ($secretJson) {
@@ -102,7 +104,7 @@ if ($RdsEndpoint) {
   if ($pgPassword) {
     $pgArgs += @("--set", "config.adminPassword=$pgPassword", "--set", "config.users.rip_admin.password=$pgPassword")
   } else {
-    Write-Warning "Secret rip-dev/rds/postgres not found — set PgBouncer password manually or re-apply RDS Terraform."
+    Write-Warning "Secret rip-dev/rds/postgres not found - set PgBouncer password manually or re-apply RDS Terraform."
   }
   helm @pgArgs
 
@@ -137,12 +139,16 @@ if ($KafkaBootstrap -and $flags.enable_debezium -and $RdsEndpoint) {
 }
 
 if ($RdsEndpoint -and -not $SkipVaultDatabase) {
-  Write-Host "==> Vault database engine (interactive — needs root token if not in vault-init.json)"
+  Write-Host "==> Vault database engine (interactive - needs root token if not in vault-init.json)"
   & (Join-Path $PSScriptRoot "vault-database-bootstrap.ps1")
 }
 
 Write-Host ""
 Write-Host "Phase 1 deploy pass complete."
-Write-Host "  RDS:        $(if ($RdsEndpoint) { $RdsEndpoint } else { 'not deployed' })"
-Write-Host "  Kafka:      $(if ($KafkaBootstrap) { $KafkaBootstrap } else { 'none — MSK or enable_incluster_kafka' })"
-Write-Host "  Runbook:    docs/runbooks/phase-1-live-deployment.md"
+Write-Host "  RDS:     $RdsEndpoint"
+if ($KafkaBootstrap) {
+  Write-Host "  Kafka:   $KafkaBootstrap"
+} else {
+  Write-Host "  Kafka:   none (MSK or enable_incluster_kafka)"
+}
+Write-Host "  Runbook: docs/runbooks/phase-1-live-deployment.md"

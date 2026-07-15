@@ -8,7 +8,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$RepoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $RepoRoot
 
 function Require-Command($name) {
@@ -21,7 +21,7 @@ Require-Command aws
 Require-Command psql
 
 $secretJson = aws secretsmanager get-secret-value --secret-id rip-dev/rds/postgres --query SecretString --output text
-if (-not $secretJson) { throw "Secret rip-dev/rds/postgres not found — apply RDS Terraform first." }
+if (-not $secretJson) { throw "Secret rip-dev/rds/postgres not found - apply RDS Terraform first." }
 $secret = $secretJson | ConvertFrom-Json
 
 if (-not $RdsEndpoint) { $RdsEndpoint = $secret.host }
