@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/Shashank519915/storeSpy/services/edge/ingestor/internal/buffer"
 	"github.com/Shashank519915/storeSpy/services/edge/ingestor/internal/health"
