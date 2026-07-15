@@ -3,6 +3,7 @@
 
 param(
   [string]$RdsEndpoint = "",
+  [int]$Port = 5432,
   [string]$Database = "rip",
   [string]$Username = "rip_admin"
 )
@@ -27,6 +28,7 @@ $secret = $secretJson | ConvertFrom-Json
 if (-not $RdsEndpoint) { $RdsEndpoint = $secret.host }
 $password = $secret.password
 $env:PGPASSWORD = $password
+$env:PGPORT = "$Port"
 
 $migrations = @(
   "001_outbox.sql",
@@ -45,5 +47,5 @@ foreach ($file in $migrations) {
   psql -h $RdsEndpoint -U $Username -d $Database -v ON_ERROR_STOP=1 -f $path
 }
 
-Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue
+Remove-Item Env:PGPASSWORD, Env:PGPORT -ErrorAction SilentlyContinue
 Write-Host "==> Migrations complete."

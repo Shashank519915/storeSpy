@@ -48,9 +48,66 @@ aws eks update-kubeconfig --region us-east-1 --name rip-dev
 kubectl get pods -n rip-system
 ```
 
----
+## Live deployment record — rip-dev (2026-07-15)
 
-## Feature toggles — what to change and where
+**Path deployed:** **Path A — RDS only** (MSK and in-cluster Kafka off until AWS billing is added).
+
+### Toggle choices (current)
+
+| Layer | Setting | Value | Reason |
+|-------|---------|-------|--------|
+| TFC | `enable_msk` | `false` | No AWS billing / MSK subscription yet |
+| TFC | `enable_rds` | `true` | PostgreSQL backbone live |
+| YAML | `enable_incluster_kafka` | `false` | Save `t3.small` pod budget |
+| YAML | `enable_schema_registry` | `false` | Requires Kafka bootstrap |
+| YAML | `enable_debezium` | `false` | Requires Kafka bootstrap |
+
+**Source files:** `infra/terraform/environments/dev/feature-toggles.tf`, `infra/config/dev/feature-flags.yaml`
+
+### Infrastructure applied
+
+| Resource | Identifier | Notes |
+|----------|------------|-------|
+| RDS PostgreSQL 16 | `rip-dev-postgres` | `db.t4g.micro`, single-AZ, `backup_retention_period=1` (Free Tier) |
+| RDS endpoint | `rip-dev-postgres.c47sc0ukk3gq.us-east-1.rds.amazonaws.com` | Private VPC only |
+| Secrets Manager | `rip-dev/rds/postgres` | `host`, `port`, `database`, `username`, `password` |
+| PgBouncer | Helm release `pgbouncer` in `rip-system` | `icoretech/pgbouncer` chart |
+| Vault DB engine | `database/` mount | Roles `rip-postgresql`, `rip-postgresql-twin` |
+
+### Scripts run (in order)
+
+| Step | Script | Result |
+|------|--------|--------|
+| 1 | HCP Terraform apply (`enable_rds=true`) | RDS `available` |
+| 2 | `.\scripts\phase1-deploy-platform.ps1` | PgBouncer deployed |
+| 3 | `.\scripts\run-rds-migrations.ps1 -RdsEndpoint localhost -Port 15432` | Migrations 001–006 (via PgBouncer port-forward) |
+| 4 | `.\scripts\vault-database-bootstrap.ps1` | Vault DB engine + policies complete |
+
+**Do not re-run** `phase1-deploy-platform.ps1` unless toggles change. Path A is complete.
+
+### Workarounds used (document for next deploy)
+
+1. **PgBouncer CrashLoop** — icoretech chart expects `config.userlist.rip_admin=<password>`, not `config.users.*.password`. Fixed in `scripts/phase1-deploy-platform.ps1` (commit `caf3528`).
+2. **RDS not reachable from laptop** — RDS SG allows VPC CIDR only. Run migrations through PgBouncer port-forward:
+
+   ```powershell
+   # Terminal 1
+   kubectl port-forward svc/pgbouncer -n rip-system 15432:5432
+
+   # Terminal 2
+   $env:Path = "C:\Program Files\PostgreSQL\17\bin;" + $env:Path
+   .\scripts\run-rds-migrations.ps1 -RdsEndpoint localhost -Port 15432
+   ```
+
+3. **`psql` not on PATH** — Install PostgreSQL 17 client (`winget install PostgreSQL.PostgreSQL.17`); open a **new** terminal or add `C:\Program Files\PostgreSQL\17\bin` to PATH.
+4. **Vault bootstrap stderr** — Vault prints warnings to stderr; script uses `$ErrorActionPreference = Continue` so warnings do not abort (commit with `vault-database-bootstrap.ps1` fix).
+5. **Terraform apply fixes applied during rollout:** RDS param `shared_preload_libraries` uses `apply_method = pending-reboot`; Free Tier backup retention set to `1` day.
+
+### Credential hygiene
+
+If tokens or keys were exposed during setup, rotate per **`docs/runbooks/credential-rotation.md`**.
+
+---
 
 Phase 1 uses **two layers** of toggles. AWS resources use Terraform; EKS runtime components use YAML + deploy script.
 
@@ -203,20 +260,23 @@ This script (toggle-aware):
 4. Runs **migrations** `001`–`006` via `run-rds-migrations.ps1`
 5. Optionally deploys **kafka-dev**, **Schema Registry**, **Debezium** per YAML flags
 
-**Manual migration only:**
-
-```powershell
-.\scripts\run-rds-migrations.ps1
-```
-
 **Pass criteria:**
 
 ```powershell
 # PgBouncer pod running
 kubectl get pods -n rip-system -l app.kubernetes.io/name=pgbouncer
 
-# PostGIS enabled (from a machine with psql + secret access)
-.\scripts\run-rds-migrations.ps1  # idempotent — safe to re-run
+# Migrations via PgBouncer port-forward (RDS is private — laptop cannot hit RDS directly)
+kubectl port-forward svc/pgbouncer -n rip-system 15432:5432
+# New terminal:
+$env:Path = "C:\Program Files\PostgreSQL\17\bin;" + $env:Path
+.\scripts\run-rds-migrations.ps1 -RdsEndpoint localhost -Port 15432
+```
+
+**Manual migration only (direct RDS — only works from inside VPC):**
+
+```powershell
+.\scripts\run-rds-migrations.ps1
 ```
 
 ### §4 — Vault database dynamic credentials (after RDS live)
@@ -313,14 +373,14 @@ Connector spec: `infra/helm/charts/kafka-connect/debezium-outbox.json`
 
 Copy to issue/PR as you complete each path.
 
-### Path A minimum (current target)
+### Path A minimum (current target) — **COMPLETE on rip-dev 2026-07-15**
 
-- [ ] `enable_rds=true` applied; `rds_endpoint` output populated
-- [ ] Migrations `001`–`006` applied; PostGIS extension present
-- [ ] PgBouncer serving `rip-system` on port 5432
-- [ ] Vault database engine configured (`vault-database-bootstrap.ps1`)
-- [ ] `outbox` table exists in `public` schema
-- [ ] Protobuf CI green (`schema-registry.yml` workflow)
+- [x] `enable_rds=true` applied; `rds_endpoint` output populated
+- [x] Migrations `001`–`006` applied; PostGIS extension present
+- [x] PgBouncer serving `rip-system` on port 5432
+- [x] Vault database engine configured (`vault-database-bootstrap.ps1`)
+- [x] `outbox` table exists in `public` schema
+- [x] Protobuf CI green (`schema-registry.yml` workflow — fixed `working-directory` for `buf generate`)
 
 ### Path B add-ons (in-cluster Kafka)
 
@@ -353,8 +413,13 @@ Copy to issue/PR as you complete each path.
 |---------|--------------|-----|
 | `SubscriptionRequiredException` on apply | MSK not subscribed | Keep `enable_msk=false`; use Path B or wait for billing |
 | RDS apply `FreeTierRestrictionError` on backup retention | Account on AWS Free Tier | Module default is `backup_retention_period = 1`; set `7` in module only after plan upgrade |
-| `psql` connection timeout | Security group or wrong endpoint | Use RDS endpoint from Secrets Manager; ensure client in VPC or use SSM port-forward |
+| `psql` not recognized | PostgreSQL client not on PATH | `winget install PostgreSQL.PostgreSQL.17`; add `C:\Program Files\PostgreSQL\17\bin` to PATH |
+| `psql` connection timeout | RDS is private (`publicly_accessible=false`) | Port-forward PgBouncer; run `run-rds-migrations.ps1 -RdsEndpoint localhost -Port 15432` |
+| PgBouncer CrashLoop | Wrong icoretech chart user format | Use `config.userlist.rip_admin=<password>` (see live deployment record) |
 | PgBouncer CrashLoop | Missing password | Re-apply RDS TF or pass secret to helm `--set` |
+| `vault-database-bootstrap.ps1` parse error | Unicode em dash in strings | Use ASCII hyphens only (fixed in repo) |
+| Vault bootstrap stops on WARNING | PowerShell treats stderr as error | Re-run with fixed script (`ErrorActionPreference = Continue`) |
+| `path is already in use at database/` | Re-running bootstrap | Harmless — engine already enabled |
 | Kafka deploy pending | Insufficient pod capacity on `t3.small` | Scale node group or disable `enable_incluster_kafka` |
 | Debezium no messages | Connector not applied / slot missing | POST connector JSON; check `rip_outbox_slot` replication slot |
 | Vault DB creds fail | Engine not bootstrapped | Run `vault-database-bootstrap.ps1` after RDS live |
@@ -363,8 +428,18 @@ Copy to issue/PR as you complete each path.
 
 ## When to start Phase 2
 
-Start Phase 2 (`docs/plans/phase-2-edge-cv.md`) when:
+Start Phase 2 (`docs/plans/phase-2-edge-cv.md`) when **Path A exit criteria** above are met.
 
-1. Path A exit criteria met (RDS + schemas + outbox)
-2. At least one Kafka path verified (Path B or C) for event flow
-3. Phase 0 Step E edge lab hardware available (optional parallel track)
+**For rip-dev (current):** Path A is complete — proceed to Phase 2 edge CV scaffolding.
+
+| Phase 1 item | Status | Blocks Phase 2? |
+|--------------|--------|-----------------|
+| RDS + schemas + outbox + PgBouncer + Vault DB | Done | No |
+| MSK / in-cluster Kafka | Deferred (`enable_msk=false`, no billing) | No — edge ingestor work is local/K3s |
+| Debezium / event flow to Kafka | Deferred | No — until MSK or Path B |
+| ClickHouse, TimescaleDB, Qdrant, Redis, MinIO | Deferred (§1.6–1.10) | No |
+| Phase 0 Step E edge lab (K3s, GPU, SPIRE) | Required for Phase 2 **exit** | Yes — provision before Phase 2 exit criteria |
+
+**MSK remains off** until AWS billing is active. When ready: set `enable_msk=true` in TFC, apply, run `msk-provision-topics.ps1`, then enable Schema Registry / Debezium per Path C.
+
+**Credential rotation:** `docs/runbooks/credential-rotation.md`

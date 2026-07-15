@@ -28,13 +28,16 @@ jobs:
       - uses: bufbuild/buf-setup-action@v1
 
       - name: buf lint
-        run: buf lint packages/proto
+        working-directory: packages/proto
+        run: buf lint
 
       - name: buf breaking (against main)
-        run: buf breaking packages/proto --against '.git#branch=main,subdir=packages/proto'
+        working-directory: packages/proto
+        run: buf breaking --against 'https://github.com/${{ github.repository }}.git#branch=main,subdir=packages/proto'
 
       - name: buf generate
-        run: buf generate packages/proto
+        working-directory: packages/proto
+        run: buf generate
 
       - name: Verify TypeScript codegen output
         run: test -d packages/proto/gen/ts

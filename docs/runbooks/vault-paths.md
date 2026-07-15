@@ -31,9 +31,28 @@ secret/data/rip/<env>/<service>/<key>
 
 ## Database Dynamic Credentials
 
-| Path | Engine | TTL |
-|------|--------|-----|
-| `database/creds/rip-postgresql` | PostgreSQL | 1h |
+| Path | Engine | TTL | Scope |
+|------|--------|-----|-------|
+| `database/creds/rip-postgresql` | PostgreSQL | 1h | `public`, `identity`, `retail`, `twin` |
+| `database/creds/rip-postgresql-twin` | PostgreSQL | 1h | `twin` schema only |
+
+## Kubernetes Auth Roles
+
+| Role | Bound SA | Policies |
+|------|----------|----------|
+| `external-secrets` | `rip-system/external-secrets` | `default`, `external-secrets` |
+| `twin-api` | `rip-system/twin-api` | `rip-twin-api` |
+| `api-gateway` | `rip-system/api-gateway` | `rip-api-gateway` |
+| `portal` | `rip-system/portal` | `rip-portal-readonly` |
+| `edge-bridge` | `rip-edge/edge-bridge` | `rip-edge-bridge` |
+
+## Debezium (static reference — KV)
+
+```
+secret/data/rip/dev/debezium/postgres
+```
+
+Fields: `host`, `port`, `database`, `username` (password remains in Secrets Manager until Debezium is enabled).
 
 ## WireGuard Peer Keys
 
@@ -43,14 +62,6 @@ secret/data/rip/<env>/wireguard/peers/<store_id>
 
 Fields: `public_key`, `private_key` (edge only), `allowed_ips`, `endpoint`
 
-## Kubernetes Auth Roles
-
-| Role | Bound SA | Policies |
-|------|----------|----------|
-| `api-gateway` | `rip-system/api-gateway` | `rip-api-gateway` |
-| `portal` | `rip-system/portal` | `rip-portal-readonly` |
-| `edge-bridge` | `rip-edge/edge-bridge` | `rip-edge-bridge` |
-
 ## Forbidden
 
 - Hardcoded secrets in manifests or source code
@@ -59,8 +70,13 @@ Fields: `public_key`, `private_key` (edge only), `allowed_ips`, `endpoint`
 
 ## Rotation
 
+**Runbook:** `docs/runbooks/credential-rotation.md`
+
 | Secret Type | Rotation | Owner |
 |-------------|----------|-------|
+| AWS IAM access keys | Manual 90d / on exposure | Developer |
+| RDS master password | Manual 90d / on exposure | SRE |
+| Vault root token | On exposure; prefer limited tokens | Security |
 | Service certs (PKI) | Auto 24h | Vault PKI engine |
 | DB dynamic creds | Auto 1h | Vault Database engine |
 | WireGuard keys | Manual 90d | SRE |

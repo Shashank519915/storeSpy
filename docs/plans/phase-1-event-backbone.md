@@ -67,9 +67,9 @@ Deploy the immutable event nervous system (Kafka MSK + Schema Registry + Debeziu
 - [x] RIP-1-051–055 — ClickHouse schema scaffolds (`infra/clickhouse/schemas/`)
 - [x] RIP-1-081–082 — Redis key schema docs (`docs/runbooks/redis-key-schema.md`)
 - [x] RIP-1-100 — `packages/go-common/kafkaconsumer` scaffold + unit test
-- [x] **Phase 1 runbook** — `docs/runbooks/phase-1-live-deployment.md` (toggle paths A/B/C)
+- [x] **Phase 1 Path A live** — RDS, PgBouncer, migrations, Vault DB on rip-dev (`docs/runbooks/phase-1-live-deployment.md` live deployment record)
 - [ ] RIP-1-031 live — deploy Connect when `enable_debezium=true` + Kafka
-- [ ] RIP-1-047 live — run Vault DB bootstrap after RDS ACTIVE
+- [x] RIP-1-047 live — Vault DB bootstrap run after RDS ACTIVE (rip-dev 2026-07-15)
 
 ### 1.1 Protobuf Schema Foundation
 | Ticket ID | Task | Output Path |
