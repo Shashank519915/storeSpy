@@ -23,6 +23,19 @@ Build the mathematically rigorous spatial substrate: event-sourced Scene Graph D
 
 ## Granular Tasks
 
+### Progress (Phase 3 cloud dev — started 2026-07-15)
+
+- [x] RIP-3-001 — `scene_graph.proto` scaffold
+- [x] RIP-3-002..007 — Migrations `020_twin_nodes` through `024_twin_indexes`
+- [x] RIP-3-008 — Dev lab seed `025_twin_seed.sql` (`store-dev-01`, `cam-virtual-01`, `shelf-a1`)
+- [x] RIP-3-010 — `apps/twin-api` scaffold with shelf-moved mutation -> outbox
+- [x] RIP-3-051 — `packages/go-common/spatial/homography.go` (Go DLT stub + projection)
+- [x] **Phase 3 runbook** — `docs/runbooks/phase-3-live-deployment.md`
+- [ ] RIP-3-012 — twin-projector (needs Kafka)
+- [ ] RIP-3-020 — spatial-query consumer (needs Kafka)
+- [ ] RIP-3-040+ — Raycasting engine (needs twin-api on EKS)
+- [ ] RIP-3-070 — Fleet GitOps CRD sync (needs edge hardware)
+
 ### 3.1 Scene Graph Data Model
 | Ticket ID | Task | Output Path |
 |-----------|------|-------------|

@@ -87,6 +87,12 @@ jobs:
       - name: cv-orchestrator test
         working-directory: services/edge/cv-orchestrator
         run: pip install -e ".[dev]" && pytest -q
+      - name: go-common spatial test
+        working-directory: packages/go-common
+        run: go test ./spatial/...
+      - name: twin-api build
+        working-directory: apps/twin-api
+        run: go build .
 
   terraform:
     name: Terraform / fmt + validate

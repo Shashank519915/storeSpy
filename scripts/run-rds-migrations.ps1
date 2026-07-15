@@ -36,7 +36,13 @@ $migrations = @(
   "003_identity.sql",
   "004_retail.sql",
   "005_twin.sql",
-  "006_indexes.sql"
+  "006_indexes.sql",
+  "020_twin_nodes.sql",
+  "021_twin_edges.sql",
+  "022_twin_cameras.sql",
+  "023_twin_versions.sql",
+  "024_twin_indexes.sql",
+  "025_twin_seed.sql"
 )
 
 Write-Host "==> Applying migrations to $RdsEndpoint / $Database"

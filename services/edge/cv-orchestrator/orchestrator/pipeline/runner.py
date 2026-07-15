@@ -6,6 +6,7 @@ import json
 import sys
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from orchestrator.config import load_edge_flags
@@ -13,6 +14,13 @@ from orchestrator.detection.mock import detect_from_sequence
 from orchestrator.interaction.product_fsm import ProductFSM
 from orchestrator.interaction.temporal_filter import TemporalFilter
 from orchestrator.sampling.fsm import PerceptionFSM, SamplingContext
+from orchestrator.spatial.calibration_loader import load_calibration
+from orchestrator.spatial.project import mock_person_bbox, project_person
+from orchestrator.tracking.simple_tracker import SimpleTracker
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[5]
 
 
 def _utc_now() -> str:
@@ -61,11 +69,19 @@ def run() -> int:
     session_id = str(flags.get("session_id", "session-dev-01"))
     camera_id = str(flags.get("virtual_camera_id", "cam-virtual-01"))
 
+    cal_path = _repo_root() / "ml/golden-datasets/manifests/calibration-stub.json"
+    calibration = load_calibration(cal_path)
+    shelf_id = "shelf-a1"
+    if calibration.shelf_rois:
+        shelf_id = calibration.shelf_rois[0].get("shelf_id", shelf_id)
+
     fsm = PerceptionFSM()
     product = ProductFSM()
     temporal = TemporalFilter()
+    tracker = SimpleTracker()
     idle_without_person = 0
     emitted = False
+    active_track_id = "track-001"
 
     for line in sys.stdin:
         line = line.strip()
@@ -78,8 +94,14 @@ def run() -> int:
         det = detect_from_sequence(seq)
         if det.person_detected:
             idle_without_person = 0
+            bbox = mock_person_bbox(seq)
+            tracks = tracker.update([bbox])
+            if tracks:
+                active_track_id = tracks[0].track_id
+            world = project_person(calibration.homography, bbox)
         else:
             idle_without_person += 1
+            world = None
 
         state = fsm.tick(
             SamplingContext(
@@ -92,15 +114,17 @@ def run() -> int:
         if state.value == "interaction" and det.pickup_vote:
             if temporal.add_vote(True):
                 product.apply_pickup_vote(True)
+                wx = world.x if world else 1.2
+                wy = world.y if world else 3.4
                 event = build_pickup_event(
                     store_id=store_id,
                     session_id=session_id,
                     camera_id=cam,
-                    track_id="track-001",
+                    track_id=active_track_id,
                     sku="SKU-DEMO-001",
-                    shelf_id="shelf-a1",
-                    world_x=1.2,
-                    world_y=3.4,
+                    shelf_id=shelf_id,
+                    world_x=wx,
+                    world_y=wy,
                     confidence=det.confidence,
                 )
                 sys.stdout.write(json.dumps(event) + "\n")

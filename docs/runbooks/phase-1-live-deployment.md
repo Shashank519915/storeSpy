@@ -445,3 +445,5 @@ Start Phase 2 (`docs/plans/phase-2-edge-cv.md`) when **Path A exit criteria** ab
 **Credential rotation:** `docs/runbooks/credential-rotation.md`
 
 **Phase 2 (no hardware):** `docs/runbooks/phase-2-cloud-dev.md`
+
+**Phase 3 (twin):** `docs/runbooks/phase-3-live-deployment.md`

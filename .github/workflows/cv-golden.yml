@@ -1,0 +1,47 @@
+name: CV Golden (cloud dev)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/edge/**"
+      - "ml/golden-datasets/**"
+      - "infra/config/dev/edge-flags.yaml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "services/edge/**"
+
+permissions:
+  contents: read
+
+jobs:
+  golden-pipeline:
+    name: Virtual camera pipeline golden check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run wired pipeline (stdout)
+        working-directory: services/edge
+        run: |
+          set -euo pipefail
+          cd ingestor
+          go run ./cmd/pipeline -max-frames 30 2>/dev/null | grep '^{' > /tmp/frames.ndjson
+          cd ../cv-orchestrator
+          pip install -e ".[dev]" -q
+          cat /tmp/frames.ndjson | python -m orchestrator.pipeline.runner 2>/dev/null | grep '^{' > /tmp/event.ndjson
+          test -s /tmp/event.ndjson
+          cat /tmp/event.ndjson | python -m orchestrator.golden.validate
+
+      - name: pytest
+        working-directory: services/edge/cv-orchestrator
+        run: pip install -e ".[dev]" -q && pytest -q

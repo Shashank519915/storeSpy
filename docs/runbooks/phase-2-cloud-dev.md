@@ -1,9 +1,12 @@
 # Phase 2 Cloud Development (No Edge Hardware)
 
-Develop and test the edge CV pipeline **without GPU, K3s, or RTSP cameras**. Uses Virtual Camera + NDJSON event output until edge lab hardware exists.
+**Status (rip-dev 2026-07-15):** Phase 2 **cloud dev path complete**. Hardware/GPU/Triton items deferred.
+
+Develop and test the edge CV pipeline **without GPU, K3s, or RTSP cameras**. Uses Virtual Camera + RDS outbox until edge lab hardware exists.
 
 **Plan reference:** `docs/plans/phase-2-edge-cv.md`  
-**Phase 1 prerequisite:** Path A complete (`docs/runbooks/phase-1-live-deployment.md`)
+**Phase 1 prerequisite:** Path A complete (`docs/runbooks/phase-1-live-deployment.md`)  
+**Next:** Phase 3 (`docs/runbooks/phase-3-live-deployment.md`)
 
 ---
 
@@ -13,8 +16,9 @@ Develop and test the edge CV pipeline **without GPU, K3s, or RTSP cameras**. Use
 |-----------|------|---------|
 | Ingestor | `services/edge/ingestor` | Virtual Camera / image file replay, ring buffer, health metrics |
 | CV orchestrator | `services/edge/cv-orchestrator` | Perception FSM + homography math |
-| State publisher | `services/edge/state-publisher` | `ProductPickedUp` NDJSON events |
-| Golden manifests | `ml/golden-datasets/manifests/` | Expected event vectors for future CI |
+| State publisher | `services/edge/state-publisher` | `ProductPickedUp` to stdout or RDS outbox |
+| Golden validator | `orchestrator/golden/validate.py` | Manifest check (CI `cv-golden.yml`) |
+| Golden manifests | `ml/golden-datasets/manifests/` | Expected event vectors |
 
 **Deferred until hardware or MSK billing:** Triton TensorRT, NVDEC CUDA, BoT-SORT live tracking, Redis/Kafka publish, edge-bridge.
 
@@ -29,6 +33,9 @@ End-to-end without hardware: **Virtual Camera -> FSM -> RDS outbox**
 ```powershell
 # Writes ProductPickedUp to live rip-dev outbox via PgBouncer port-forward
 .\scripts\run-edge-pipeline.ps1
+
+# With golden manifest validation
+.\scripts\run-edge-pipeline.ps1 -StdoutOnly -ValidateGolden
 
 # Stdout only (no kubectl/AWS)
 .\scripts\run-edge-pipeline.ps1 -StdoutOnly

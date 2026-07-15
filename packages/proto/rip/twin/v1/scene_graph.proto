@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package rip.twin.v1;
+
+import "google/protobuf/timestamp.proto";
+import "rip/common/v1/envelope.proto";
+import "rip/common/v1/geometry.proto";
+
+option go_package = "github.com/rip/rip/packages/proto/gen/go/rip/twin/v1;twinv1";
+
+enum TwinNodeType {
+  TWIN_NODE_TYPE_UNSPECIFIED = 0;
+  TWIN_NODE_TYPE_STORE = 1;
+  TWIN_NODE_TYPE_ZONE = 2;
+  TWIN_NODE_TYPE_AISLE = 3;
+  TWIN_NODE_TYPE_FIXTURE = 4;
+  TWIN_NODE_TYPE_SHELF = 5;
+  TWIN_NODE_TYPE_FACING = 6;
+}
+
+message TwinNode {
+  string id = 1;
+  string store_id = 2;
+  string parent_id = 3;
+  TwinNodeType node_type = 4;
+  string label = 5;
+  map<string, string> metadata = 6;
+}
+
+message TwinEdge {
+  string id = 1;
+  string store_id = 2;
+  string from_node_id = 3;
+  string to_node_id = 4;
+  double cost_m = 5;
+}
+
+message SpatialTransform {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double yaw_degrees = 4;
+}
+
+message MutationEvent {
+  rip.common.v1.EventEnvelope envelope = 1;
+  oneof mutation {
+    ShelfMovedMutation shelf_moved = 2;
+    CameraCalibratedMutation camera_calibrated = 3;
+    ZoneAddedMutation zone_added = 4;
+  }
+}
+
+message ShelfMovedMutation {
+  string shelf_id = 1;
+  int32 twin_version = 2;
+  rip.common.v1.WorldPoint world_position = 3;
+}
+
+message CameraCalibratedMutation {
+  string camera_id = 1;
+  repeated double homography_matrix = 2;
+  int32 twin_version = 3;
+}
+
+message ZoneAddedMutation {
+  string zone_id = 1;
+  string zone_type = 2;
+  int32 twin_version = 3;
+}

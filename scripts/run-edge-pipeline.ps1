@@ -1,7 +1,8 @@
 # Wired edge pipeline: ingestor -> orchestrator -> state-publisher (toggle-aware)
 param(
   [switch]$SkipOutbox,
-  [switch]$StdoutOnly
+  [switch]$StdoutOnly,
+  [switch]$ValidateGolden
 )
 
 $ErrorActionPreference = "Stop"
@@ -113,3 +114,10 @@ if ($pfJob) {
 }
 
 Write-Host "==> Wired edge pipeline complete (sink=$sink)"
+
+if ($ValidateGolden) {
+  Write-Host "==> Golden manifest validation"
+  Push-Location services/edge/cv-orchestrator
+  Get-Content $eventsFile | Where-Object { $_.Trim().StartsWith("{") } | python -m orchestrator.golden.validate
+  Pop-Location
+}
