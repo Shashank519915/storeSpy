@@ -1,5 +1,5 @@
-# Phase 3 twin schema extensions
-# Ticket: RIP-3-002..006
+-- Phase 3 twin schema extensions
+-- Ticket: RIP-3-002..006
 
 CREATE TABLE IF NOT EXISTS twin.nodes (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
