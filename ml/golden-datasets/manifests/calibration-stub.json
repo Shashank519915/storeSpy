@@ -1,0 +1,12 @@
+{
+  "camera_id": "cam-virtual-01",
+  "store_id": "store-dev-01",
+  "homography_matrix": [
+    [1.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.0, 0.0, 1.0]
+  ],
+  "shelf_rois": [
+    {"shelf_id": "shelf-a1", "polygon_uv": [[100, 200], [300, 200], [300, 400], [100, 400]]}
+  ]
+}

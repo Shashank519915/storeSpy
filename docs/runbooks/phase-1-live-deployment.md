@@ -443,3 +443,5 @@ Start Phase 2 (`docs/plans/phase-2-edge-cv.md`) when **Path A exit criteria** ab
 **MSK remains off** until AWS billing is active. When ready: set `enable_msk=true` in TFC, apply, run `msk-provision-topics.ps1`, then enable Schema Registry / Debezium per Path C.
 
 **Credential rotation:** `docs/runbooks/credential-rotation.md`
+
+**Phase 2 (no hardware):** `docs/runbooks/phase-2-cloud-dev.md`

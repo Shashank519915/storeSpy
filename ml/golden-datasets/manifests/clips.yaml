@@ -1,0 +1,18 @@
+# Golden dataset manifest — metadata only; clip binaries live in object storage / LFS later.
+version: 1
+store_id: store-dev-01
+clips:
+  - id: clip-001-pickup-synthetic
+    camera_id: cam-virtual-01
+    source: virtual
+    duration_sec: 30
+    expected_events:
+      - type: vision.interaction.ProductPickedUp
+        shelf_id: shelf-a1
+        time_window_ms: [12000, 13500]
+        min_confidence: 0.7
+  - id: clip-002-idle-baseline
+    camera_id: cam-virtual-01
+    source: virtual
+    duration_sec: 60
+    expected_events: []

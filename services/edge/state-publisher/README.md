@@ -1,6 +1,12 @@
 ﻿# state-publisher
 
-Go Kafka/Redis Streams publisher.
+Go event publisher. **Cloud dev path** emits NDJSON `ProductPickedUp` events to stdout.
 
-Phase 0 placeholder — implementation begins in later phases per docs/plans/.
+```powershell
+cd services/edge/state-publisher
+go run ./cmd/state-publisher
+```
 
+Kafka/Redis wiring deferred until MSK or in-cluster Kafka is enabled.
+
+Tickets: RIP-2-080 (envelope wrapper).

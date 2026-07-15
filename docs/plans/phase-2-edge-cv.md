@@ -14,6 +14,8 @@ Phase 0 runbook Step E (K3s lab, GPU Operator, SPIRE edge SVIDs, WireGuard soak)
 
 Cloud-only Phase 1 work (MSK, RDS, ClickHouse) can proceed in parallel while edge hardware is provisioned.
 
+**No hardware?** Use the cloud dev path: `docs/runbooks/phase-2-cloud-dev.md` (Virtual Camera, local FSM/homography, NDJSON events). GPU/K3s items remain deferred until hardware is available.
+
 
 ## Phase Objective
 Build the production edge perception stack: Rust/Go FFmpeg NVDEC ingestor with CUDA pinned-memory ring buffer, Triton Inference Server with TensorRT engines, BoT-SORT + CMC tracking, 3D homography ground-plane projection, dynamic frame-sampling state machine, and semantic event emission to edge Redis Streams/Kafka. At exit, a live RTSP feed (or synthetic Virtual Camera) produces `ProductPickedUp` events with world coordinates enriched via Digital Twin shelf mapping stubs.
@@ -34,6 +36,23 @@ Build the production edge perception stack: Rust/Go FFmpeg NVDEC ingestor with C
 ---
 
 ## Granular Tasks
+
+### Progress (Phase 2 cloud dev — no hardware)
+
+- [x] RIP-2-001 — Go ingestor scaffold (`services/edge/ingestor`)
+- [x] RIP-2-004/005 — Software ring buffer + drop-oldest policy
+- [x] RIP-2-008 — `InputSource` interface (`virtual`, `file` adapters)
+- [x] RIP-2-010 — Health/metrics (`/healthz`, `cv_dropped_frames_total`)
+- [x] RIP-2-030 — Perception FSM (`cv-orchestrator/orchestrator/sampling/fsm.py`)
+- [x] RIP-2-050..055 — Homography DLT + stub calibration loader
+- [x] RIP-2-080 — State publisher NDJSON envelope (`state-publisher`)
+- [x] RIP-2-090 — Virtual Camera driver (synthetic frames)
+- [x] RIP-2-091 — Golden dataset manifests (`ml/golden-datasets/manifests/`)
+- [x] **Cloud dev runbook** — `docs/runbooks/phase-2-cloud-dev.md`
+- [ ] RIP-2-002/003 — RTSP pool + reconnect (needs RTSP server)
+- [ ] RIP-2-020+ — Triton on K3s GPU (needs edge hardware)
+- [ ] RIP-2-040+ — BoT-SORT live tracking (needs Triton + golden clips)
+- [ ] RIP-2-092 — GPU golden CI workflow
 
 ### 2.1 FFmpeg NVDEC Ingestor Service
 | Ticket ID | Task | Output Path |
