@@ -30,6 +30,10 @@ variable "backup_retention_period" {
   description = "Days of automated backups. AWS Free Tier max is 1; use 7+ after upgrading account plan."
 }
 
+variable "allocated_storage_gb" {
+  type    = number
+  default = 20
+}
 
 variable "database_name" {
   type    = string
