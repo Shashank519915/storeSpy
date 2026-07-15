@@ -352,7 +352,7 @@ Copy to issue/PR as you complete each path.
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | `SubscriptionRequiredException` on apply | MSK not subscribed | Keep `enable_msk=false`; use Path B or wait for billing |
-| RDS apply fails on subnet | VPC module not applied | Re-apply full stack |
+| RDS apply `FreeTierRestrictionError` on backup retention | Account on AWS Free Tier | Module default is `backup_retention_period = 1`; set `7` in module only after plan upgrade |
 | `psql` connection timeout | Security group or wrong endpoint | Use RDS endpoint from Secrets Manager; ensure client in VPC or use SSM port-forward |
 | PgBouncer CrashLoop | Missing password | Re-apply RDS TF or pass secret to helm `--set` |
 | Kafka deploy pending | Insufficient pod capacity on `t3.small` | Scale node group or disable `enable_incluster_kafka` |

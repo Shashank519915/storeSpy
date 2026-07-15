@@ -24,10 +24,12 @@ variable "multi_az" {
   default = false
 }
 
-variable "allocated_storage_gb" {
-  type    = number
-  default = 20
+variable "backup_retention_period" {
+  type        = number
+  default     = 1
+  description = "Days of automated backups. AWS Free Tier max is 1; use 7+ after upgrading account plan."
 }
+
 
 variable "database_name" {
   type    = string
@@ -117,7 +119,7 @@ resource "aws_db_instance" "main" {
   skip_final_snapshot = true
   deletion_protection = false
 
-  backup_retention_period = 7
+  backup_retention_period = var.backup_retention_period
   backup_window           = "03:00-04:00"
   maintenance_window      = "sun:04:00-sun:05:00"
 
