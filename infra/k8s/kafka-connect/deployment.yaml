@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-connect
+  namespace: rip-system
+  labels:
+    app: kafka-connect
+spec:
+  selector:
+    app: kafka-connect
+  ports:
+    - name: rest
+      port: 8083
+      targetPort: 8083
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-connect
+  namespace: rip-system
+  labels:
+    app: kafka-connect
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-connect
+  template:
+    metadata:
+      labels:
+        app: kafka-connect
+    spec:
+      containers:
+        - name: connect
+          image: debezium/connect:2.5
+          ports:
+            - containerPort: 8083
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: REPLACE_KAFKA_BOOTSTRAP
+            - name: GROUP_ID
+              value: rip-debezium-connect
+            - name: CONFIG_STORAGE_TOPIC
+              value: rip-connect-configs
+            - name: OFFSET_STORAGE_TOPIC
+              value: rip-connect-offsets
+            - name: STATUS_STORAGE_TOPIC
+              value: rip-connect-status
+            - name: CONFIG_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: OFFSET_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: STATUS_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: KEY_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: VALUE_CONVERTER
+              value: org.apache.kafka.connect.json.JsonConverter
+            - name: KEY_CONVERTER_SCHEMAS_ENABLE
+              value: "false"
+            - name: VALUE_CONVERTER_SCHEMAS_ENABLE
+              value: "false"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /connectors
+              port: 8083
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8083
+            initialDelaySeconds: 60
+            periodSeconds: 20

@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 }
 
@@ -51,12 +55,6 @@ variable "github_org" {
 variable "github_repo" {
   type    = string
   default = "storeSpy"
-}
-
-variable "enable_msk" {
-  type        = bool
-  default     = false
-  description = "Provision Amazon MSK (3× kafka.t3.small). Requires AWS billing/payment method — new accounts hit SubscriptionRequiredException until subscribed. Set true after adding payment method in AWS Billing."
 }
 
 locals {
@@ -171,6 +169,17 @@ module "msk_iam" {
   tags                      = local.common_tags
 }
 
+module "rds" {
+  count  = var.enable_rds ? 1 : 0
+  source = "../../modules/rds-postgres"
+
+  name                       = local.name
+  vpc_id                     = module.vpc.vpc_id
+  vpc_cidr                   = local.vpc_cidr
+  database_subnet_group_name = module.vpc.database_subnet_group_name
+  tags                       = local.common_tags
+}
+
 output "vpc_id" {
   value = module.vpc.vpc_id
 }
@@ -214,4 +223,42 @@ output "msk_topic_manifest" {
 
 output "msk_admin_role_arn" {
   value = var.enable_msk ? module.msk_iam[0].msk_admin_role_arn : null
+}
+
+output "feature_flags" {
+  value = local.feature_flags
+}
+
+output "kafka_bootstrap_servers" {
+  value     = local.kafka_bootstrap_servers != "" ? local.kafka_bootstrap_servers : null
+  sensitive = true
+}
+
+output "kafka_auth_mode" {
+  value = local.kafka_auth_mode
+}
+
+output "rds_endpoint" {
+  value = var.enable_rds ? module.rds[0].endpoint : null
+}
+
+output "rds_port" {
+  value = var.enable_rds ? module.rds[0].port : null
+}
+
+output "rds_database_name" {
+  value = var.enable_rds ? module.rds[0].database_name : null
+}
+
+output "rds_master_username" {
+  value = var.enable_rds ? module.rds[0].master_username : null
+}
+
+output "rds_master_password" {
+  value     = var.enable_rds ? module.rds[0].master_password : null
+  sensitive = true
+}
+
+output "rds_secrets_manager_arn" {
+  value = var.enable_rds ? module.rds[0].secrets_manager_arn : null
 }

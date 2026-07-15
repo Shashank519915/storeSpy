@@ -1,0 +1,32 @@
+# Kafka Connect + Debezium — gated by enable_debezium in feature-flags.yaml
+# Requires: Kafka (MSK or kafka-dev) + RDS PostgreSQL
+# Ticket: RIP-1-031, RIP-1-032
+
+image: debezium/connect:2.5
+
+replicaCount: 1
+
+kafka:
+  bootstrapServers: ""  # set at deploy from TF output or in-cluster default
+  authMode: plaintext   # aws_msk_iam when enable_msk=true
+
+connect:
+  groupId: rip-debezium-connect
+  configStorageTopic: rip-connect-configs
+  offsetStorageTopic: rip-connect-offsets
+  statusStorageTopic: rip-connect-status
+  replicationFactor: 1  # dev / in-cluster; use 3 with MSK
+
+database:
+  hostname: ""  # RDS endpoint from TF / Secrets Manager
+  port: 5432
+  name: rip
+  username: rip_admin
+  # password via ExternalSecret → rip-system/debezium-db
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 384Mi
+  limits:
+    memory: 768Mi

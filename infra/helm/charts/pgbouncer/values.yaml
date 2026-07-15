@@ -1,0 +1,35 @@
+# PgBouncer — transaction pooling in front of RDS PostgreSQL
+# Ticket: RIP-1-046
+#
+# helm repo add icoretech https://icoretech.github.io/helm
+# helm upgrade --install pgbouncer icoretech/pgbouncer -n rip-system \
+#   -f infra/helm/charts/pgbouncer/values.yaml -f infra/helm/charts/pgbouncer/values-dev.yaml \
+#   --set config.databases.rip.host=<rds-endpoint> \
+#   --set config.users.rip_admin.password=<from-secrets-manager>
+
+replicaCount: 1
+
+config:
+  adminUser: rip_admin
+  adminPassword: ""  # set via --set or ExternalSecret
+  databases:
+    rip:
+      host: ""  # RDS endpoint
+      port: 5432
+      dbname: rip
+  pgbouncer:
+    pool_mode: transaction
+    max_client_conn: 200
+    default_pool_size: 25
+    reserve_pool_size: 5
+
+service:
+  type: ClusterIP
+  port: 5432
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    memory: 128Mi

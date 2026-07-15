@@ -1,0 +1,33 @@
+{
+  "name": "rip-outbox-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "database.hostname": "${DATABASE_HOST}",
+    "database.port": "5432",
+    "database.user": "${DATABASE_USER}",
+    "database.password": "${DATABASE_PASSWORD}",
+    "database.dbname": "rip",
+    "database.server.name": "rip",
+    "plugin.name": "pgoutput",
+    "slot.name": "rip_outbox_slot",
+    "publication.name": "rip_outbox_pub",
+    "publication.autocreate.mode": "filtered",
+    "table.include.list": "public.outbox",
+    "topic.prefix": "rip",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "transforms": "outbox",
+    "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
+    "transforms.outbox.route.topic.replacement": "${routedByValue}",
+    "transforms.outbox.table.field.event.id": "id",
+    "transforms.outbox.table.field.event.key": "aggregate_id",
+    "transforms.outbox.table.field.event.type": "event_type",
+    "transforms.outbox.table.field.event.payload": "payload",
+    "transforms.outbox.table.expand.json.payload": "false",
+    "transforms.outbox.route.by.field": "event_type",
+    "snapshot.mode": "initial"
+  }
+}

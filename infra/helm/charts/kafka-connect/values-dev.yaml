@@ -1,0 +1,12 @@
+# Dev — single Connect worker, minimal topics RF=1 (in-cluster Kafka)
+replicaCount: 1
+
+connect:
+  replicationFactor: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

@@ -1,0 +1,54 @@
+# In-cluster Kafka (single broker) — dev path when enable_msk=false
+# Ticket: RIP-1-010 (dev substitute)
+# Deploy only when infra/config/dev/feature-flags.yaml has enable_incluster_kafka: true
+#
+# helm repo add bitnami https://charts.bitnami.com/bitnami
+# helm upgrade --install kafka-dev bitnami/kafka -n rip-system \
+#   -f infra/helm/charts/kafka-dev/values-dev.yaml --wait --timeout 15m
+
+# Minimal footprint for t3.small EKS (no MSK subscription yet)
+replicaCount: 1
+
+kraft:
+  enabled: true
+  controller:
+    replicaCount: 1
+
+controller:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  persistence:
+    enabled: true
+    size: 8Gi
+
+broker:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  persistence:
+    enabled: true
+    size: 8Gi
+
+listeners:
+  client:
+    protocol: PLAINTEXT
+  controller:
+    protocol: PLAINTEXT
+  interbroker:
+    protocol: PLAINTEXT
+  external:
+    protocol: PLAINTEXT
+
+service:
+  type: ClusterIP
+
+# Bootstrap: kafka-dev.rip-system.svc.cluster.local:9092

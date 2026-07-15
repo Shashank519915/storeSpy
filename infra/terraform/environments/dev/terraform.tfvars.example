@@ -1,0 +1,13 @@
+# Example Terraform Cloud workspace variables for rip-dev
+# Copy names into HCP Terraform → rip-dev → Variables (Terraform category)
+
+enable_msk             = false   # AWS MSK — enable after subscription active
+enable_rds             = true    # RDS PostgreSQL 16 (db.t4g.micro)
+enable_incluster_kafka = false   # Documented output only; Helm uses feature-flags.yaml
+enable_schema_registry = false   # Documented output only
+enable_debezium        = false   # Documented output only
+
+aws_region   = "us-east-1"
+environment  = "dev"
+github_org   = "Shashank519915"
+github_repo  = "storeSpy"

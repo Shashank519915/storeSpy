@@ -1,0 +1,12 @@
+# Runtime feature flags for rip-dev — keep in sync with infra/terraform/environments/dev/feature-toggles.tf
+# Used by Helm deploy scripts and app config; Terraform toggles are source of truth for AWS resources.
+
+enable_msk: false
+enable_rds: true
+enable_incluster_kafka: false
+enable_schema_registry: false
+enable_debezium: false
+
+# Derived (do not edit — scripts compute from above)
+# kafka_bootstrap_servers: set by scripts/phase1-deploy-platform.ps1 from TF outputs or in-cluster default
+# kafka_auth_mode: aws_msk_iam | plaintext

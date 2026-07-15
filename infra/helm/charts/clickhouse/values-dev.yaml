@@ -1,0 +1,23 @@
+# ClickHouse Operator — dev scaffold (deploy deferred until Kafka + node upgrade)
+# Ticket: RIP-1-050
+# Heavy footprint — do not enable on t3.small without scaling nodes.
+
+# helm repo add altinity https://docs.altinity.com/clickhouse-operator/
+# Apply operator separately, then:
+# helm upgrade --install clickhouse altinity/clickhouse -n rip-system -f values-dev.yaml
+
+replicas: 1
+shards: 1
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    memory: 1Gi
+
+persistence:
+  size: 20Gi
+
+zookeeper:
+  enabled: false  # use ClickHouse Keeper in single-node dev when operator supports it

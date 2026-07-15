@@ -10,7 +10,7 @@
 | Grafana / kube-prometheus-stack | Post–Phase 6 hardening | `rip-dev` uses `t3.small`; monitoring dashboards re-enabled after node upgrade |
 | Vault PostgreSQL dynamic secrets (RIP-0-023) | **This phase — §1.5** (RIP-1-047) | Configure after RDS PostgreSQL is live; path `database/creds/rip-postgresql` |
 | Phase 0 Step E edge lab (K3s, SPIRE, WireGuard) | **Phase 2** (see `phase-2-edge-cv.md`) | Cloud backbone first; edge lab required before edge CV exit criteria |
-| **Amazon MSK** | **After AWS billing subscription** | New accounts: `SubscriptionRequiredException` on `CreateConfiguration`. Set `enable_msk = true` in `dev/main.tf` after adding a payment method. Until then, continue §1.4/§1.5 (RDS, outbox) and Schema Registry can target in-cluster Kafka later. |
+| **Amazon MSK** | **After AWS billing subscription** | Set `enable_msk = true` in TFC or `feature-toggles.tf`. See `docs/runbooks/feature-toggles.md`. Until then: RDS + outbox; flip `enable_incluster_kafka` for Debezium dev path. |
 
 
 ## Phase Objective
@@ -45,16 +45,31 @@ Deploy the immutable event nervous system (Kafka MSK + Schema Registry + Debeziu
 - [x] RIP-1-008 — `buf.gen.yaml` (Go, Python, TypeScript)
 - [x] RIP-1-030 — `infra/migrations/001_outbox.sql`
 - [x] RIP-1-014 — `docs/runbooks/kafka-serde.md`
-- [ ] RIP-1-010+ — MSK Terraform, Schema Registry Helm, remaining persistence tier
-- [x] RIP-1-016 — MSK IAM roles (`msk-iam`: admin, producer, consumer) — created; destroyed when `enable_msk=false`
-- [ ] RIP-1-010 live — MSK cluster (`enable_msk=true` after AWS billing subscription)
+- [x] RIP-1-016 — MSK IAM roles (`msk-iam`: admin, producer, consumer) — gated by `enable_msk`
+- [ ] RIP-1-010 live — MSK cluster (`enable_msk=true` after AWS MSK subscription)
 - [x] RIP-1-011 — Topic manifest `msk-topics` + EKS bootstrap Job
 - [x] RIP-1-012 — Partition strategy documented (`kafka-topic-catalog.md`)
 - [x] RIP-1-015 — DLQ + retry topics per consumer domain
-- [x] RIP-1-016 — MSK IAM roles (`msk-iam`: admin, producer, consumer)
-- [x] RIP-1-013 — Schema Registry Helm values scaffold
-- [ ] RIP-1-013 live — deploy Schema Registry after MSK ACTIVE
+- [x] RIP-1-013 — Schema Registry Helm values scaffold (deploy when `enable_schema_registry=true`)
+- [ ] RIP-1-013 live — deploy Schema Registry after Kafka bootstrap available
 - [ ] RIP-1-014 — Wire Serde end-to-end with live registry
+- [x] **Feature toggles** — `enable_msk`, `enable_rds`, `enable_incluster_kafka`, `enable_schema_registry`, `enable_debezium` (`docs/runbooks/feature-toggles.md`)
+- [x] RIP-1-040 — RDS module (`rds-postgres`, `enable_rds=true` default)
+- [x] RIP-1-041 — `002_schemas.sql` (PostGIS + schemas)
+- [x] RIP-1-042 — `003_identity.sql`
+- [x] RIP-1-043 — `004_retail.sql`
+- [x] RIP-1-044 — `005_twin.sql`
+- [x] RIP-1-045 — `006_indexes.sql`
+- [x] RIP-1-046 — PgBouncer Helm values scaffold
+- [x] RIP-1-031 — Kafka Connect / Debezium scaffold (`kafka-connect/`, `debezium-outbox.json`, `infra/k8s/kafka-connect/`)
+- [x] RIP-1-033 — `apps/event-injector` (outbox row in TX)
+- [x] RIP-1-047 — Vault DB bootstrap script + `twin-api` policy (`scripts/vault-database-bootstrap.ps1`)
+- [x] RIP-1-051–055 — ClickHouse schema scaffolds (`infra/clickhouse/schemas/`)
+- [x] RIP-1-081–082 — Redis key schema docs (`docs/runbooks/redis-key-schema.md`)
+- [x] RIP-1-100 — `packages/go-common/kafkaconsumer` scaffold + unit test
+- [x] **Phase 1 runbook** — `docs/runbooks/phase-1-live-deployment.md` (toggle paths A/B/C)
+- [ ] RIP-1-031 live — deploy Connect when `enable_debezium=true` + Kafka
+- [ ] RIP-1-047 live — run Vault DB bootstrap after RDS ACTIVE
 
 ### 1.1 Protobuf Schema Foundation
 | Ticket ID | Task | Output Path |
@@ -255,6 +270,7 @@ Deploy the immutable event nervous system (Kafka MSK + Schema Registry + Debeziu
 - [ ] Consumer library (Go + Python) passes idempotency + DLQ unit/integration tests
 - [ ] All Phase 1 Grafana alerts configured: DLQ depth, outbox lag, edge buffer pressure, consumer lag
 - [ ] Runbook: `kafka-topic-catalog.md`, `clickhouse-schema.md`, `edge-bridge-ops.md`
+- [x] Runbook: `phase-1-live-deployment.md`, `feature-toggles.md`, `redis-key-schema.md`
 
 **Phase 1 outputs are strict dependencies for Phase 2.**
 

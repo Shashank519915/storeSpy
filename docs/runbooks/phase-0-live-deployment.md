@@ -398,4 +398,5 @@ Start Phase 1 when:
 2. At minimum: **Terraform dev applied + EKS reachable + CI green on main**
 3. Full edge/SPIRE/WireGuard can proceed in parallel with Phase 1 event backbone work
 
-Phase 1 plan: `docs/plans/phase-1-event-backbone.md`
+Phase 1 plan: `docs/plans/phase-1-event-backbone.md`  
+Phase 1 deploy runbook: `docs/runbooks/phase-1-live-deployment.md`
