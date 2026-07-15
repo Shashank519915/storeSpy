@@ -47,8 +47,9 @@ Build the production edge perception stack: Rust/Go FFmpeg NVDEC ingestor with C
 - [x] RIP-2-050..055 — Homography DLT + stub calibration loader
 - [x] RIP-2-080 — State publisher NDJSON envelope (`state-publisher`)
 - [x] RIP-2-090 — Virtual Camera driver (synthetic frames)
-- [x] RIP-2-091 — Golden dataset manifests (`ml/golden-datasets/manifests/`)
-- [x] **Cloud dev runbook** — `docs/runbooks/phase-2-cloud-dev.md`
+- [x] RIP-2-060/061 — Product FSM + temporal filter stubs
+- [x] **Wired cloud pipeline** — ingestor ticks -> orchestrator -> RDS outbox (`scripts/run-edge-pipeline.ps1`)
+- [x] **Edge feature toggles** — `infra/config/dev/edge-flags.yaml`, `docs/runbooks/edge-feature-toggles.md`
 - [ ] RIP-2-002/003 — RTSP pool + reconnect (needs RTSP server)
 - [ ] RIP-2-020+ — Triton on K3s GPU (needs edge hardware)
 - [ ] RIP-2-040+ — BoT-SORT live tracking (needs Triton + golden clips)

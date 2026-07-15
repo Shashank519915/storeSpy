@@ -1,0 +1,17 @@
+# Edge runtime toggles — rip-dev cloud dev path (no hardware)
+# Mirror pattern of infra/config/dev/feature-flags.yaml
+
+enable_edge_hardware: false   # K3s GPU lab, WireGuard edge node
+enable_rtsp_ingest: false      # real RTSP cameras (requires edge network)
+enable_gpu_nvdec: false        # CUDA/NVDEC ingestor path
+enable_triton_inference: false # Triton TensorRT on GPU
+enable_redis_publish: false    # edge Redis Streams sink
+enable_kafka_publish: false    # MSK / in-cluster Kafka sink (requires enable_msk or enable_incluster_kafka)
+enable_rds_outbox_sink: true    # write ProductPickedUp to PostgreSQL outbox (Phase 1 Path A)
+
+# Cloud dev defaults (no hardware)
+pipeline_frames: 30
+pipeline_fps: 10
+virtual_camera_id: cam-virtual-01
+store_id: store-dev-01
+session_id: session-dev-01

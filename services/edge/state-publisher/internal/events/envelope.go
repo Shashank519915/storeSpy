@@ -13,6 +13,8 @@ type EventEnvelope struct {
 	SessionID     string    `json:"session_id"`
 	SchemaVersion string    `json:"schema_version"`
 	EventType     string    `json:"event_type"`
+	AggregateType string    `json:"aggregate_type,omitempty"`
+	AggregateID   string    `json:"aggregate_id,omitempty"`
 	Payload       any       `json:"payload"`
 }
 

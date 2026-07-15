@@ -18,9 +18,33 @@ Develop and test the edge CV pipeline **without GPU, K3s, or RTSP cameras**. Use
 
 **Deferred until hardware or MSK billing:** Triton TensorRT, NVDEC CUDA, BoT-SORT live tracking, Redis/Kafka publish, edge-bridge.
 
+**Edge toggles:** `infra/config/dev/edge-flags.yaml` — see `docs/runbooks/edge-feature-toggles.md`
+
 ---
 
-## Quick start
+## Wired pipeline (recommended)
+
+End-to-end without hardware: **Virtual Camera -> FSM -> RDS outbox**
+
+```powershell
+# Writes ProductPickedUp to live rip-dev outbox via PgBouncer port-forward
+.\scripts\run-edge-pipeline.ps1
+
+# Stdout only (no kubectl/AWS)
+.\scripts\run-edge-pipeline.ps1 -StdoutOnly
+```
+
+Stages:
+
+1. `ingestor/cmd/pipeline` — emits frame ticks (NDJSON)
+2. `orchestrator/pipeline/runner` — mock detect + FSM + temporal filter
+3. `state-publisher -stdin -sink outbox` — inserts outbox row
+
+Legacy three-step demo (still works):
+
+```powershell
+.\scripts\run-edge-dev-pipeline.ps1
+```
 
 ### 1. Ingestor (Virtual Camera)
 
