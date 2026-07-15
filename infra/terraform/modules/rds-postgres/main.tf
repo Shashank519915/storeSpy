@@ -73,13 +73,15 @@ resource "aws_db_parameter_group" "postgres16" {
   description = "RIP PostgreSQL 16 parameters"
 
   parameter {
-    name  = "shared_preload_libraries"
-    value = "pg_stat_statements"
+    name         = "shared_preload_libraries"
+    value        = "pg_stat_statements"
+    apply_method = "pending-reboot"
   }
 
   parameter {
-    name  = "log_statement"
-    value = "ddl"
+    name         = "log_statement"
+    value        = "ddl"
+    apply_method = "immediate"
   }
 
   tags = var.tags

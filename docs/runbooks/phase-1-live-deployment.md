@@ -24,6 +24,32 @@ aws eks describe-cluster --region us-east-1 --name rip-dev --query "cluster.stat
 
 ---
 
+## Local scripts — where and when to run
+
+All deploy scripts are run from the **repo root** in PowerShell (Cursor terminal is fine):
+
+```powershell
+cd C:\Users\aksanand\Desktop\storeSpy
+```
+
+| Order | Script | When |
+|-------|--------|------|
+| **1** | `.\scripts\phase0-deploy-platform.ps1` | **Required first** — installs Vault, Istio, ArgoCD, OTel, External Secrets on EKS |
+| **2** | *(wait for TFC apply)* | RDS + infra from Terraform |
+| **3** | `.\scripts\phase1-deploy-platform.ps1` | **After** Phase 0 is healthy **and** RDS Terraform apply succeeded |
+
+**If you skipped Phase 0:** run `phase0-deploy-platform.ps1` before `phase1-deploy-platform.ps1`. Phase 1 assumes Vault, `rip-system` namespace, and kubectl access already exist.
+
+**Prerequisites on your PC:** AWS CLI configured (`aws configure`), `kubectl`, `helm`, and `psql` for migrations.
+
+```powershell
+# Quick check before Phase 1
+aws eks update-kubeconfig --region us-east-1 --name rip-dev
+kubectl get pods -n rip-system
+```
+
+---
+
 ## Feature toggles — what to change and where
 
 Phase 1 uses **two layers** of toggles. AWS resources use Terraform; EKS runtime components use YAML + deploy script.
