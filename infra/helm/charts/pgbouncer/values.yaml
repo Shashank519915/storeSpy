@@ -5,7 +5,8 @@
 # helm upgrade --install pgbouncer icoretech/pgbouncer -n rip-system \
 #   -f infra/helm/charts/pgbouncer/values.yaml -f infra/helm/charts/pgbouncer/values-dev.yaml \
 #   --set config.databases.rip.host=<rds-endpoint> \
-#   --set config.users.rip_admin.password=<from-secrets-manager>
+#   --set config.adminPassword=<from-secrets-manager> \
+#   --set-string config.userlist.rip_admin=<from-secrets-manager>
 
 replicaCount: 1
 
@@ -22,6 +23,8 @@ config:
     max_client_conn: 200
     default_pool_size: 25
     reserve_pool_size: 5
+    server_tls_sslmode: require
+    auth_type: md5
 
 service:
   type: ClusterIP

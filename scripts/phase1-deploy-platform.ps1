@@ -110,7 +110,10 @@ if ($RdsEndpoint) {
     "--wait", "--timeout", "10m"
   )
   if ($pgPassword) {
-    $pgArgs += @("--set", "config.adminPassword=$pgPassword", "--set", "config.users.rip_admin.password=$pgPassword")
+    $pgArgs += @(
+      "--set", "config.adminPassword=$pgPassword",
+      "--set-string", "config.userlist.rip_admin=$pgPassword"
+    )
   } else {
     Write-Warning "Secret rip-dev/rds/postgres not found - set PgBouncer password manually or re-apply RDS Terraform."
   }
