@@ -52,11 +52,19 @@ helm repo add icoretech https://icoretech.github.io/helm 2>$null
 helm repo update
 
 if (-not $RdsEndpoint) {
-  # Use --db-instance-identifier (avoid JMESPath [?...] which breaks PowerShell parsing)
+  # Single-quoted query avoids PowerShell parsing [?...] filters
   $RdsEndpoint = aws rds describe-db-instances `
+    --region us-east-1 `
     --db-instance-identifier rip-dev-postgres `
-    --query 'Endpoint.Address' `
+    --query 'DBInstances[0].Endpoint.Address' `
     --output text 2>$null
+  if (-not $RdsEndpoint -or $RdsEndpoint -eq "None") {
+    # Fallback: Secrets Manager (written by Terraform)
+    $secretJson = aws secretsmanager get-secret-value --secret-id rip-dev/rds/postgres --query SecretString --output text 2>$null
+    if ($secretJson) {
+      $RdsEndpoint = ($secretJson | ConvertFrom-Json).host
+    }
+  }
   if (-not $RdsEndpoint -or $RdsEndpoint -eq "None") {
     if ($flags.enable_rds) {
       Write-Warning "RDS rip-dev-postgres not found. Apply Terraform with enable_rds=true first."
